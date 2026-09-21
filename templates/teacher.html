@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Кабинет преподавателя{% endblock %}
+
+{% block page_title %}Кабинет преподавателя{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+    <span class="panel-label">Рабочий кабинет</span>
+
+    <h2>
+        Добро пожаловать, {{ user.full_name }}! 👋
+    </h2>
+
+    <p>
+        Здесь будут группы, расписание, задания,
+        оценки, посещаемость и объявления.
+    </p>
+</div>
+
+<div class="panel">
+    <span class="panel-label">Мои группы и предметы</span>
+
+    {% if assignments %}
+        <div class="assignment-list">
+            {% for assignment in assignments %}
+                <div class="assignment-card">
+                    <h3>{{ assignment.subject.name }}</h3>
+
+                    {% if assignment.subject.code %}
+                        <p>Код: {{ assignment.subject.code }}</p>
+                    {% endif %}
+
+                    <p>
+                        Группа:
+                        <strong>{{ assignment.group.name }}</strong>
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>
+            Пока вам не назначены предметы и группы.
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Портал колледжа{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-logo">К</div>
+
+                <div>
+                    <strong>Колледж</strong>
+                    <span>Портал</span>
+                </div>
+            </div>
+
+            <nav class="navigation">
+
+                <a href="/" class="nav-item active">
+                    <span>⌂</span>
+                    Главная
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>▣</span>
+                    Расписание
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>✓</span>
+                    Задания
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>▤</span>
+                    Оценки
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>◷</span>
+                    Посещаемость
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>▱</span>
+                    Материалы
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>!</span>
+                    Объявления
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>?</span>
+                    Первокурснику
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <a href="#" class="nav-item">
+                    <span>⚙</span>
+                    Настройки
+                </a>
+
+                <div class="profile-mini">
+                    <div class="avatar">Г</div>
+
+                    <div>
+                        <strong>Гость</strong>
+                        <span>Не авторизован</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <main class="content">
+
+            <header class="topbar">
+
+                <div>
+                    <div class="page-label">Образовательный портал</div>
+                    <h1>{% block page_title %}Главная{% endblock %}</h1>
+                </div>
+
+                <div class="topbar-actions">
+
+                    <button class="icon-button" title="Уведомления">
+                        🔔
+                    </button>
+
+                    <button class="login-button">
+                        Войти
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+</body>
+</html>

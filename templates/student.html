@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Кабинет студента{% endblock %}
+
+{% block page_title %}Кабинет студента{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+    <span class="panel-label">Личный кабинет</span>
+
+    <h2>
+        Привет, {{ user.full_name }}! 👋
+    </h2>
+
+    <p>
+        Здесь будут расписание, задания, оценки,
+        посещаемость и учебные материалы.
+    </p>
+</div>
+
+{% endblock %}

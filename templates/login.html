@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Портал колледжа{% endblock %}
+
+{% block page_title %}Вход{% endblock %}
+
+{% block content %}
+
+<div class="login-page">
+
+    <div class="login-card">
+
+        <div class="login-icon">
+            🔐
+        </div>
+
+        <h2>Вход в портал</h2>
+
+        <p>
+            Войдите, чтобы получить доступ
+            к функциям колледжа.
+        </p>
+
+        <form method="post" action="/login">
+
+            <label for="username">
+                Логин
+            </label>
+
+            <input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="Введите логин"
+                required
+            >
+
+            <label for="password">
+                Пароль
+            </label>
+
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Введите пароль"
+                required
+            >
+
+            <button type="submit">
+                Войти
+            </button>
+
+        </form>
+
+        <div class="test-accounts">
+            <strong>Тестовые аккаунты</strong>
+
+            <p>Студент: <code>student</code></p>
+            <p>Преподаватель: <code>teacher</code></p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

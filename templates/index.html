@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Портал колледжа{% endblock %}
+
+{% block page_title %}Главная{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+
+    <div>
+        <span class="welcome-label">Добро пожаловать 👋</span>
+
+        <h2>
+            Всё необходимое для учёбы —
+            в одном месте.
+        </h2>
+
+        <p>
+            Расписание, задания, оценки, объявления
+            и учебные материалы колледжа.
+        </p>
+    </div>
+
+</section>
+
+
+<section class="quick-grid">
+
+    <article class="info-card">
+        <span class="card-icon">📅</span>
+
+        <div>
+            <span class="card-label">Сегодня</span>
+            <strong>Расписание</strong>
+        </div>
+
+        <span class="card-value">—</span>
+    </article>
+
+
+    <article class="info-card">
+        <span class="card-icon">📝</span>
+
+        <div>
+            <span class="card-label">Активные</span>
+            <strong>Задания</strong>
+        </div>
+
+        <span class="card-value">—</span>
+    </article>
+
+
+    <article class="info-card">
+        <span class="card-icon">📢</span>
+
+        <div>
+            <span class="card-label">Новые</span>
+            <strong>Объявления</strong>
+        </div>
+
+        <span class="card-value">—</span>
+    </article>
+
+</section>
+
+
+<section class="dashboard-grid">
+
+    <article class="panel">
+
+        <div class="panel-header">
+            <div>
+                <span class="panel-label">Сегодня</span>
+                <h3>Расписание</h3>
+            </div>
+
+            <a href="#">Открыть всё →</a>
+        </div>
+
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+
+            <strong>Расписание пока недоступно</strong>
+
+            <p>
+                После входа здесь появится расписание вашей группы.
+            </p>
+        </div>
+
+    </article>
+
+
+    <article class="panel">
+
+        <div class="panel-header">
+            <div>
+                <span class="panel-label">Новости колледжа</span>
+                <h3>Объявления</h3>
+            </div>
+
+            <a href="#">Все →</a>
+        </div>
+
+        <div class="empty-state">
+            <div class="empty-icon">📢</div>
+
+            <strong>Пока нет объявлений</strong>
+
+            <p>
+                Новые сообщения колледжа появятся здесь.
+            </p>
+        </div>
+
+    </article>
+
+</section>
+
+
+<section class="freshman-banner">
+
+    <div class="freshman-icon">🎓</div>
+
+    <div>
+        <span>Новый студент?</span>
+
+        <h3>
+            Загляни в раздел «Первокурснику»
+        </h3>
+
+        <p>
+            Справка, полезные инструкции и ответы
+            на частые вопросы.
+        </p>
+    </div>
+
+    <a href="#" class="banner-button">
+        Перейти →
+    </a>
+
+</section>
+
+{% endblock %}
