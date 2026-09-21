@@ -144,10 +144,11 @@ async def login(
     )
 
     response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        samesite="lax",
+    key="access_token",
+    value=token,
+    httponly=True,
+    samesite="lax",
+    path="/",
     )
 
     return response
