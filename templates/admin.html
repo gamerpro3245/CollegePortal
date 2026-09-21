@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Администрирование — Портал колледжа{% endblock %}
+
+{% block page_title %}Администрирование{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+
+    <div>
+        <span class="welcome-label">Панель администратора</span>
+
+        <h2>
+            Добро пожаловать, {{ user.full_name }} 👋
+        </h2>
+
+        <p>
+            Здесь будет управление пользователями,
+            группами, специальностями, предметами и
+            учебным процессом.
+        </p>
+    </div>
+
+</section>
+
+
+<section class="quick-grid">
+
+    <a href="/admin/groups" class="info-card">
+        <span class="card-icon">👥</span>
+
+        <div>
+            <span class="card-label">Учебные группы</span>
+            <strong>Группы</strong>
+        </div>
+
+        <span class="card-value">→</span>
+    </a>
+
+
+    <a href="/admin/students" class="info-card">
+        <span class="card-icon">🎓</span>
+
+        <div>
+            <span class="card-label">Пользователи</span>
+            <strong>Студенты</strong>
+        </div>
+
+        <span class="card-value">→</span>
+    </a>
+
+
+    <a href="/admin/teachers" class="info-card">
+        <span class="card-icon">👨‍🏫</span>
+
+        <div>
+            <span class="card-label">Пользователи</span>
+            <strong>Преподаватели</strong>
+        </div>
+
+        <span class="card-value">→</span>
+    </a>
+
+</section>
+
+
+<section class="dashboard-grid">
+
+    <article class="panel">
+
+        <div class="panel-header">
+            <div>
+                <span class="panel-label">Управление</span>
+                <h3>Пользователи</h3>
+            </div>
+        </div>
+
+        <div class="empty-state">
+
+            <div class="empty-icon">👤</div>
+
+            <strong>
+                Управление пользователями
+            </strong>
+
+            <p>
+                Добавление студентов и преподавателей
+                будет доступно здесь.
+            </p>
+
+        </div>
+
+    </article>
+
+
+    <article class="panel">
+
+        <div class="panel-header">
+            <div>
+                <span class="panel-label">Учебный процесс</span>
+                <h3>Группы и специальности</h3>
+            </div>
+        </div>
+
+        <div class="empty-state">
+
+            <div class="empty-icon">🏫</div>
+
+            <strong>
+                Управление группами
+            </strong>
+
+            <p>
+                Здесь администратор сможет создавать группы,
+                назначать специальности и кураторов.
+            </p>
+
+        </div>
+
+    </article>
+
+</section>
+
+{% endblock %}

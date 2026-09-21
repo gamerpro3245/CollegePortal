@@ -46,6 +46,9 @@ class User(Base):
     teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(
         back_populates="teacher",
     )
+role: Mapped[str] = mapped_column(
+String(20),
+)
 
 
 class Group(Base):

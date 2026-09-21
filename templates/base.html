@@ -11,113 +11,120 @@
 
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <aside class="sidebar">
+    <aside class="sidebar">
 
-            <div class="brand">
-                <div class="brand-logo">К</div>
+        <div class="brand">
+            <div class="brand-logo">К</div>
+
+            <div>
+                <strong>Колледж</strong>
+                <span>Портал</span>
+            </div>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="/" class="nav-item">
+                <span>⌂</span>
+                Главная
+            </a>
+
+            <a href="/schedule" class="nav-item">
+                <span>▣</span>
+                Расписание
+            </a>
+
+            <a href="/assignments" class="nav-item">
+                <span>✓</span>
+                Задания
+            </a>
+
+            <a href="/grades" class="nav-item">
+                <span>▤</span>
+                Оценки
+            </a>
+
+            <a href="/attendance" class="nav-item">
+                <span>◷</span>
+                Посещаемость
+            </a>
+
+            <a href="/materials" class="nav-item">
+                <span>◫</span>
+                Материалы
+            </a>
+
+            <a href="/announcements" class="nav-item">
+                <span>!</span>
+                Объявления
+            </a>
+
+            <a href="/freshman" class="nav-item">
+                <span>?</span>
+                Первокурснику
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="/login" class="nav-item">
+                <span>⚙</span>
+                Войти
+            </a>
+
+            <div class="profile-mini">
+                <div class="avatar">Г</div>
 
                 <div>
-                    <strong>Колледж</strong>
-                    <span>Портал</span>
+                    <strong>Гость</strong>
+                    <span>Не авторизован</span>
                 </div>
             </div>
 
-            <nav class="navigation">
+        </div>
 
-                <a href="/" class="nav-item active">
-                    <span>⌂</span>
-                    Главная
+    </aside>
+
+
+    <main class="content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="page-label">Образовательный портал</div>
+
+                <h1>
+                    {% block page_title %}Главная{% endblock %}
+                </h1>
+            </div>
+
+            <div class="topbar-actions">
+
+                <button
+                    class="icon-button"
+                    type="button"
+                    title="Уведомления"
+                >
+                    🔔
+                </button>
+
+                <a href="/login" class="login-button">
+                    Войти
                 </a>
-
-                <a href="#" class="nav-item">
-                    <span>▣</span>
-                    Расписание
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>✓</span>
-                    Задания
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>▤</span>
-                    Оценки
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>◷</span>
-                    Посещаемость
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>▱</span>
-                    Материалы
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>!</span>
-                    Объявления
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>?</span>
-                    Первокурснику
-                </a>
-
-            </nav>
-
-            <div class="sidebar-bottom">
-
-                <a href="#" class="nav-item">
-                    <span>⚙</span>
-                    Настройки
-                </a>
-
-                <div class="profile-mini">
-                    <div class="avatar">Г</div>
-
-                    <div>
-                        <strong>Гость</strong>
-                        <span>Не авторизован</span>
-                    </div>
-                </div>
 
             </div>
 
-        </aside>
+        </header>
 
 
-        <main class="content">
+        {% block content %}{% endblock %}
 
-            <header class="topbar">
+    </main>
 
-                <div>
-                    <div class="page-label">Образовательный портал</div>
-                    <h1>{% block page_title %}Главная{% endblock %}</h1>
-                </div>
-
-                <div class="topbar-actions">
-
-                    <button class="icon-button" title="Уведомления">
-                        🔔
-                    </button>
-
-                    <button class="login-button">
-                        Войти
-                    </button>
-
-                </div>
-
-            </header>
-
-
-            {% block content %}{% endblock %}
-
-        </main>
-
-    </div>
+</div>
 
 </body>
 </html>

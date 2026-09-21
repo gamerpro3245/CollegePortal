@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} — Портал колледжа{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+
+    <div>
+        <span class="welcome-label">Раздел портала</span>
+
+        <h2>{{ page_title }}</h2>
+
+        <p>
+            {{ page_description }}
+        </p>
+    </div>
+
+</section>
+
+<section class="dashboard-grid">
+
+    <article class="panel">
+
+        <div class="panel-header">
+            <div>
+                <span class="panel-label">В разработке</span>
+                <h3>{{ page_title }}</h3>
+            </div>
+        </div>
+
+        <div class="empty-state">
+
+            <div class="empty-icon">📚</div>
+
+            <strong>Раздел готовится</strong>
+
+            <p>
+                Здесь появится полноценный функционал портала.
+            </p>
+
+        </div>
+
+    </article>
+
+</section>
+
+{% endblock %}

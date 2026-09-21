@@ -3,35 +3,67 @@ from app.models import User
 from app.auth import password_hash
 
 
+def create_user_if_missing(
+    db,
+    username: str,
+    password: str,
+    full_name: str,
+    role: str,
+):
+    existing_user = (
+        db.query(User)
+        .filter(User.username == username)
+        .first()
+    )
+
+    if existing_user:
+        print(f"Пользователь {username} уже существует.")
+        return
+
+    user = User(
+        username=username,
+        password_hash=password_hash.hash(password),
+        full_name=full_name,
+        role=role,
+        is_active=True,
+    )
+
+    db.add(user)
+
+    print(f"Пользователь {username} добавлен.")
+
+
 def seed_users():
     with SessionLocal() as db:
-        existing_users = db.query(User).count()
+        create_user_if_missing(
+            db,
+            username="admin",
+            password="admin123",
+            full_name="Администратор портала",
+            role="admin",
+        )
 
-        if existing_users > 0:
-            print("Пользователи уже существуют. Ничего не добавляем.")
-            return
-
-        student = User(
+        create_user_if_missing(
+            db,
             username="student",
-            password_hash=password_hash.hash("student123"),
+            password="student123",
             full_name="Тестовый студент",
             role="student",
-            is_active=True,
         )
 
-        teacher = User(
+        create_user_if_missing(
+            db,
             username="teacher",
-            password_hash=password_hash.hash("teacher123"),
+            password="teacher123",
             full_name="Тестовый преподаватель",
             role="teacher",
-            is_active=True,
         )
 
-        db.add_all([student, teacher])
         db.commit()
 
-        print("Тестовые пользователи добавлены.")
+        print("Проверка пользователей завершена.")
 
 
 if __name__ == "__main__":
     seed_users()
+
