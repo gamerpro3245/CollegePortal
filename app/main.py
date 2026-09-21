@@ -32,6 +32,12 @@ app.mount(
 )
 
 templates = Jinja2Templates(directory="templates")
+def template_context(request: Request, **extra):
+    context = {
+        "user": getattr(request.state, "user", None),
+    }
+    context.update(extra)
+    return context
 def get_current_user(
     access_token: str | None,
     db: Session,
