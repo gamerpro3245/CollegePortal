@@ -1,128 +1,188 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Портал колледжа{% endblock %}</title>
+```
+<title>{% block title %}Портал колледжа{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+```
+
 </head>
 
 <body>
 
 <div class="app">
 
-    <aside class="sidebar">
+```
+<aside class="sidebar">
 
-        <div class="brand">
-            <div class="brand-logo">К</div>
+    <div class="brand">
+        <div class="brand-logo">К</div>
+
+        <div>
+            <strong>Колледж</strong>
+            <span>Портал</span>
+        </div>
+    </div>
+
+    <nav class="navigation">
+
+        <a href="/" class="nav-item">
+            <span>⌂</span>
+            Главная
+        </a>
+
+        <a href="/schedule" class="nav-item">
+            <span>▣</span>
+            Расписание
+        </a>
+
+        <a href="/assignments" class="nav-item">
+            <span>✓</span>
+            Задания
+        </a>
+
+        <a href="/grades" class="nav-item">
+            <span>▤</span>
+            Оценки
+        </a>
+
+        <a href="/attendance" class="nav-item">
+            <span>◷</span>
+            Посещаемость
+        </a>
+
+        <a href="/materials" class="nav-item">
+            <span>◫</span>
+            Материалы
+        </a>
+
+        <a href="/announcements" class="nav-item">
+            <span>!</span>
+            Объявления
+        </a>
+
+        <a href="/freshman" class="nav-item">
+            <span>?</span>
+            Первокурснику
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        {% if user %}
+
+        <a href="/" class="nav-item">
+            <span>⌂</span>
+            На главную
+        </a>
+
+        <a href="/logout" class="nav-item">
+            <span>↪</span>
+            Выйти
+        </a>
+
+        <div class="profile-mini">
+
+            <div class="avatar">
+                {{ user.full_name[0] | upper }}
+            </div>
 
             <div>
-                <strong>Колледж</strong>
-                <span>Портал</span>
+                <strong>{{ user.full_name }}</strong>
+
+                <span>
+                    {% if user.role == "student" %}
+                        Студент
+                    {% elif user.role == "teacher" %}
+                        Преподаватель
+                    {% elif user.role == "admin" %}
+                        Администратор
+                    {% else %}
+                        Пользователь
+                    {% endif %}
+                </span>
             </div>
+
         </div>
 
-        <nav class="navigation">
+        {% else %}
 
-            <a href="/" class="nav-item">
-                <span>⌂</span>
-                Главная
-            </a>
+        <a href="/login" class="nav-item">
+            <span>⚙</span>
+            Войти
+        </a>
 
-            <a href="/schedule" class="nav-item">
-                <span>▣</span>
-                Расписание
-            </a>
+        <div class="profile-mini">
 
-            <a href="/assignments" class="nav-item">
-                <span>✓</span>
-                Задания
-            </a>
+            <div class="avatar">Г</div>
 
-            <a href="/grades" class="nav-item">
-                <span>▤</span>
-                Оценки
-            </a>
+            <div>
+                <strong>Гость</strong>
+                <span>Не авторизован</span>
+            </div>
 
-            <a href="/attendance" class="nav-item">
-                <span>◷</span>
-                Посещаемость
-            </a>
+        </div>
 
-            <a href="/materials" class="nav-item">
-                <span>◫</span>
-                Материалы
-            </a>
+        {% endif %}
 
-            <a href="/announcements" class="nav-item">
-                <span>!</span>
-                Объявления
-            </a>
+    </div>
 
-            <a href="/freshman" class="nav-item">
-                <span>?</span>
-                Первокурснику
-            </a>
+</aside>
 
-        </nav>
 
-        <div class="sidebar-bottom">
+<main class="content">
 
-            <a href="/login" class="nav-item">
-                <span>⚙</span>
+    <header class="topbar">
+
+        <div>
+            <div class="page-label">
+                Образовательный портал
+            </div>
+
+            <h1>
+                {% block page_title %}Главная{% endblock %}
+            </h1>
+        </div>
+
+        <div class="topbar-actions">
+
+            <button
+                class="icon-button"
+                type="button"
+                title="Уведомления"
+            >
+                🔔
+            </button>
+
+            {% if user %}
+
+            <span class="login-button">
+                {{ user.full_name }}
+            </span>
+
+            {% else %}
+
+            <a href="/login" class="login-button">
                 Войти
             </a>
 
-            <div class="profile-mini">
-                <div class="avatar">Г</div>
-
-                <div>
-                    <strong>Гость</strong>
-                    <span>Не авторизован</span>
-                </div>
-            </div>
+            {% endif %}
 
         </div>
 
-    </aside>
+    </header>
 
 
-    <main class="content">
+    {% block content %}{% endblock %}
 
-        <header class="topbar">
-
-            <div>
-                <div class="page-label">Образовательный портал</div>
-
-                <h1>
-                    {% block page_title %}Главная{% endblock %}
-                </h1>
-            </div>
-
-            <div class="topbar-actions">
-
-                <button
-                    class="icon-button"
-                    type="button"
-                    title="Уведомления"
-                >
-                    🔔
-                </button>
-
-                <a href="/login" class="login-button">
-                    Войти
-                </a>
-
-            </div>
-
-        </header>
-
-
-        {% block content %}{% endblock %}
-
-    </main>
+</main>
+```
 
 </div>
 

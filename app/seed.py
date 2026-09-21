@@ -17,7 +17,12 @@ def create_user_if_missing(
     )
 
     if existing_user:
-        print(f"Пользователь {username} уже существует.")
+        existing_user.password_hash = password_hash.hash(password)
+        existing_user.full_name = full_name
+        existing_user.role = role
+        existing_user.is_active = True
+
+        print(f"Пользователь {username} обновлён.")
         return
 
     user = User(

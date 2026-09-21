@@ -25,8 +25,6 @@ from app.auth import (
 from app.database import get_db
 from app.models import TeachingAssignment, User, Group
 app = FastAPI(title="Портал колледжа")
-
-
 app.mount(
     "/static",
     StaticFiles(directory="static"),
@@ -34,7 +32,6 @@ app.mount(
 )
 
 templates = Jinja2Templates(directory="templates")
-
 def get_current_user(
     access_token: str | None,
     db: Session,
@@ -65,7 +62,6 @@ def get_current_user(
 
     except jwt.PyJWTError:
         return None
-
 def require_admin(
     access_token: str | None,
     db: Session,
@@ -424,3 +420,17 @@ async def admin_create_student(
         url="/admin/students",
         status_code=303,
     )
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse(
+        url="/login",
+        status_code=303,
+    )
+
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+    )
+
+    return response
