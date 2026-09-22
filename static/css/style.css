@@ -1020,204 +1020,6 @@ a {
 
 }
 
-/* =========================
-   МОБИЛЬНАЯ АДАПТАЦИЯ
-   ========================= */
-
-@media (max-width: 768px) {
-
-    body {
-        overflow-x: hidden;
-    }
-
-    .app {
-        display: block;
-        min-height: 100vh;
-    }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        padding: 12px;
-    }
-
-    .brand {
-        margin-bottom: 10px;
-    }
-
-    .navigation {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    .nav-item {
-        flex: 1 1 auto;
-        min-width: 120px;
-        box-sizing: border-box;
-        padding: 10px;
-    }
-
-    .sidebar-bottom {
-        margin-top: 10px;
-    }
-
-    .profile-mini {
-        max-width: 100%;
-    }
-
-    .content {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 14px;
-    }
-
-    .topbar {
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .topbar h1 {
-        font-size: 24px;
-        line-height: 1.2;
-    }
-
-    .topbar-actions {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .login-button,
-    .icon-button {
-        min-height: 44px;
-        box-sizing: border-box;
-    }
-
-    .login-button {
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .info-grid,
-    .cards-grid,
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .info-card,
-    .card {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    table {
-        display: block;
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    input,
-    select,
-    textarea,
-    button {
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-
-    .form-row {
-        flex-direction: column;
-    }
-
-}
-
-
-/* =========================================
-   МОБИЛЬНОЕ ВЫДВИЖНОЕ МЕНЮ
-   ========================================= */
-
-.mobile-menu-button,
-.mobile-close-button,
-.sidebar-overlay {
-    display: none;
-}
-
-
-@media (max-width: 768px) {
-
-    .mobile-menu-button {
-        display: flex;
-        position: fixed;
-        left: 12px;
-        top: 12px;
-        width: 44px;
-        height: 44px;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        border-radius: 10px;
-        font-size: 24px;
-        cursor: pointer;
-        z-index: 2000;
-    }
-
-    .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 260px;
-        max-width: 85vw;
-        height: 100vh;
-        z-index: 3000;
-
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
-
-        overflow-y: auto;
-    }
-
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-
-    .mobile-close-button {
-        display: flex;
-        position: absolute;
-        right: 12px;
-        top: 12px;
-        width: 38px;
-        height: 38px;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        border-radius: 50%;
-        font-size: 28px;
-        cursor: pointer;
-        z-index: 10;
-    }
-
-    .sidebar-overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 2500;
-
-        background: rgba(0, 0, 0, 0.45);
-
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-
-        transition: opacity 0.25s ease;
-    }
-
-    .sidebar-overlay.mobile-open {
-        opacity: 1;
 /* =========================================
    RESPONSIVE
    ========================================= */
@@ -1244,6 +1046,8 @@ a {
    MOBILE SIDEBAR
    ========================================= */
 
+/* По умолчанию мобильные элементы скрыты */
+
 .mobile-menu-button,
 .mobile-close-button,
 .sidebar-overlay {
@@ -1251,25 +1055,38 @@ a {
 }
 
 
+/* =========================================
+   ТЕЛЕФОН
+   ========================================= */
+
 @media (max-width: 650px) {
 
+    html,
     body {
+        width: 100%;
+        min-width: 0;
         overflow-x: hidden;
     }
 
-    /* Страница */
     .app {
         display: block;
-        min-height: 100vh;
         width: 100%;
+        min-height: 100vh;
     }
 
-    /* Контент занимает весь экран */
+
+    /* =========================
+       ОСНОВНОЙ КОНТЕНТ
+       ========================= */
+
     .content {
         width: 100%;
+        min-width: 0;
         margin-left: 0;
+
         padding: 70px 15px 20px;
     }
+
 
     /* =========================
        КНОПКА ☰
@@ -1304,7 +1121,13 @@ a {
 
         z-index: 5000;
 
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        box-shadow:
+            0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+
+    .mobile-menu-button:active {
+        transform: scale(0.96);
     }
 
 
@@ -1325,6 +1148,7 @@ a {
         height: 100vh;
 
         margin: 0;
+
         padding: 24px 16px;
 
         background: var(--surface);
@@ -1333,14 +1157,18 @@ a {
 
         z-index: 6000;
 
+        overflow-x: hidden;
         overflow-y: auto;
 
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
+        transform: translateX(-105%);
+
+        transition:
+            transform 0.25s ease;
     }
 
 
-    /* Открытое меню */
+    /* ОТКРЫТОЕ МЕНЮ */
+
     .sidebar.mobile-open {
         transform: translateX(0);
     }
@@ -1414,7 +1242,7 @@ a {
 
 
     /* =========================
-       ВНУТРИ SIDEBAR
+       SIDEBAR ВНУТРИ
        ========================= */
 
     .brand {
@@ -1422,17 +1250,20 @@ a {
         padding-right: 45px;
     }
 
+
     .navigation {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
+
     .nav-item {
-        flex: none;
         width: 100%;
         min-width: 0;
+        flex: none;
     }
+
 
     .sidebar-bottom {
         margin-top: auto;
@@ -1448,16 +1279,38 @@ a {
         flex-wrap: wrap;
     }
 
+
     .topbar h1 {
         font-size: 24px;
         line-height: 1.2;
     }
 
+
     .topbar-actions {
         width: 100%;
+
         display: flex;
+
         gap: 8px;
+
         flex-wrap: wrap;
+    }
+
+
+    .login-button,
+    .icon-button {
+        min-height: 44px;
+    }
+
+
+    .login-button {
+        max-width: 100%;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
     }
 
 
@@ -1468,6 +1321,7 @@ a {
     .quick-grid {
         grid-template-columns: 1fr;
     }
+
 
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -1481,6 +1335,7 @@ a {
     .welcome {
         padding: 24px;
     }
+
 
     .welcome h2 {
         font-size: 25px;
@@ -1496,6 +1351,7 @@ a {
         flex-wrap: wrap;
     }
 
+
     .banner-button {
         width: 100%;
         text-align: center;
@@ -1507,7 +1363,29 @@ a {
        ========================= */
 
     .table-wrapper {
+        width: 100%;
         overflow-x: auto;
+    }
+
+
+    .admin-table-panel {
+        padding: 18px;
+    }
+
+
+    .admin-table-panel .panel-header {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+
+    .admin-back-button {
+        white-space: nowrap;
+    }
+
+
+    .admin-table {
+        min-width: 600px;
     }
 }
 
@@ -1523,4 +1401,4 @@ a {
     .sidebar-overlay {
         display: none !important;
     }
-        }
+}
