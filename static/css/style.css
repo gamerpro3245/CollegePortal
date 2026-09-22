@@ -1211,83 +1211,95 @@ a {
 
     .mobile-menu-button {
         display: flex;
-
         position: fixed;
-        left: 10px;
-        top: 10px;
-
+        left: 12px;
+        top: 12px;
         width: 44px;
         height: 44px;
-
         align-items: center;
         justify-content: center;
-
         border: none;
         border-radius: 10px;
-
-        background: #ffffff;
-        color: #222;
-
         font-size: 24px;
         cursor: pointer;
-
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
-
         z-index: 2000;
     }
 
-
     .sidebar {
         position: fixed;
-
-        top: 0;
         left: 0;
-
+        top: 0;
         width: 260px;
         max-width: 85vw;
         height: 100vh;
-
         z-index: 3000;
 
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.25s ease;
 
         overflow-y: auto;
     }
-
 
     .sidebar.mobile-open {
         transform: translateX(0);
     }
 
-
     .mobile-close-button {
         display: flex;
-
         position: absolute;
-
-        top: 10px;
-        right: 10px;
-
+        right: 12px;
+        top: 12px;
         width: 38px;
         height: 38px;
-
         align-items: center;
         justify-content: center;
-
         border: none;
         border-radius: 50%;
-
-        background: rgba(0, 0, 0, 0.08);
-
         font-size: 28px;
-        line-height: 1;
-
         cursor: pointer;
-
         z-index: 10;
     }
 
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 2500;
+
+        background: rgba(0, 0, 0, 0.45);
+
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.mobile-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .content {
+        width: 100%;
+        min-width: 0;
+        padding: 70px 15px 20px;
+        box-sizing: border-box;
+    }
+}
+
+
+/* На компьютере мобильные кнопки вообще не показываем */
+@media (min-width: 769px) {
+
+    .mobile-menu-button,
+    .mobile-close-button,
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+}
 
     .sidebar-overlay {
         position: fixed;
