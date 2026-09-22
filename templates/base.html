@@ -12,7 +12,26 @@
 ```
 
 </head>
+<script>
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
+    const mobileCloseButton = document.getElementById("mobileCloseButton");
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
+    function openMobileMenu() {
+        sidebar.classList.add("mobile-open");
+        sidebarOverlay.classList.add("mobile-open");
+    }
+
+    function closeMobileMenu() {
+        sidebar.classList.remove("mobile-open");
+        sidebarOverlay.classList.remove("mobile-open");
+    }
+
+    mobileMenuButton.addEventListener("click", openMobileMenu);
+    mobileCloseButton.addEventListener("click", closeMobileMenu);
+    sidebarOverlay.addEventListener("click", closeMobileMenu);
+</script>
 <body>
 
 <div class="app">
