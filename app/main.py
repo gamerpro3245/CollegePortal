@@ -32,6 +32,18 @@ app.mount(
 )
 
 templates = Jinja2Templates(directory="templates")
+@app.middleware("http")
+async def load_current_user(request: Request, call_next):
+    db = next(get_db())
+
+    try:
+        access_token = request.cookies.get("access_token")
+        request.state.user = get_current_user(access_token, db)
+
+        response = await call_next(request)
+        return response
+    finally:
+        db.close()
 def template_context(request: Request, **extra):
     context = {
         "user": getattr(request.state, "user", None),
