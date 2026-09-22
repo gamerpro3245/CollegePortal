@@ -31,7 +31,14 @@ app.mount(
     name="static"
 )
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates",
+    context_processors=[
+        lambda request: {
+            "user": getattr(request.state, "user", None)
+        }
+    ],
+)
 @app.middleware("http")
 async def load_current_user(request: Request, call_next):
     db = next(get_db())
