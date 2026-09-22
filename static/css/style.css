@@ -579,66 +579,7 @@ a {
 }
 
 
-/* MOBILE */
 
-@media (max-width: 900px) {
-
-    .sidebar {
-        width: 210px;
-    }
-
-    .content {
-        width: calc(100% - 210px);
-        margin-left: 210px;
-
-        padding: 24px;
-    }
-
-    .quick-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-@media (max-width: 650px) {
-
-    .sidebar {
-        display: none;
-    }
-
-    .content {
-        width: 100%;
-        margin-left: 0;
-
-        padding: 20px;
-    }
-
-    .topbar h1 {
-        font-size: 24px;
-    }
-
-    .welcome {
-        padding: 24px;
-    }
-
-    .welcome h2 {
-        font-size: 25px;
-    }
-
-    .freshman-banner {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .banner-button {
-        width: 100%;
-        text-align: center;
-    }
-}
 /* LOGIN */
 
 .login-page {
@@ -1277,65 +1218,309 @@ a {
 
     .sidebar-overlay.mobile-open {
         opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-    }
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 900px) {
 
     .content {
+        width: calc(100% - 210px);
+        margin-left: 210px;
+        padding: 24px;
+    }
+
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================
+   MOBILE SIDEBAR
+   ========================================= */
+
+.mobile-menu-button,
+.mobile-close-button,
+.sidebar-overlay {
+    display: none;
+}
+
+
+@media (max-width: 650px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Страница */
+    .app {
+        display: block;
+        min-height: 100vh;
         width: 100%;
-        min-width: 0;
+    }
+
+    /* Контент занимает весь экран */
+    .content {
+        width: 100%;
+        margin-left: 0;
         padding: 70px 15px 20px;
-        box-sizing: border-box;
-    }
-}
-
-
-/* На компьютере мобильные кнопки вообще не показываем */
-@media (min-width: 769px) {
-
-    .mobile-menu-button,
-    .mobile-close-button,
-    .sidebar-overlay {
-        display: none !important;
     }
 
-}
+    /* =========================
+       КНОПКА ☰
+       ========================= */
+
+    .mobile-menu-button {
+        display: flex;
+
+        position: fixed;
+
+        left: 12px;
+        top: 12px;
+
+        width: 44px;
+        height: 44px;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 0;
+
+        border: 1px solid var(--border);
+        border-radius: 12px;
+
+        background: var(--surface);
+        color: var(--text);
+
+        font-size: 24px;
+        line-height: 1;
+
+        cursor: pointer;
+
+        z-index: 5000;
+
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+
+    /* =========================
+       SIDEBAR
+       ========================= */
+
+    .sidebar {
+        display: flex;
+
+        position: fixed;
+
+        left: 0;
+        top: 0;
+
+        width: 260px;
+        max-width: 85vw;
+        height: 100vh;
+
+        margin: 0;
+        padding: 24px 16px;
+
+        background: var(--surface);
+
+        border-right: 1px solid var(--border);
+
+        z-index: 6000;
+
+        overflow-y: auto;
+
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+
+
+    /* Открытое меню */
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+
+    /* =========================
+       КНОПКА ×
+       ========================= */
+
+    .mobile-close-button {
+        display: flex;
+
+        position: absolute;
+
+        right: 12px;
+        top: 12px;
+
+        width: 38px;
+        height: 38px;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 0;
+
+        border: 0;
+        border-radius: 50%;
+
+        background: var(--surface-soft);
+        color: var(--text);
+
+        font-size: 27px;
+        line-height: 1;
+
+        cursor: pointer;
+
+        z-index: 10;
+    }
+
+
+    /* =========================
+       ЗАТЕМНЕНИЕ
+       ========================= */
 
     .sidebar-overlay {
+        display: block;
+
         position: fixed;
 
         inset: 0;
 
         background: rgba(0, 0, 0, 0.45);
 
-        z-index: 2500;
+        z-index: 5500;
 
         opacity: 0;
+        visibility: hidden;
         pointer-events: none;
 
-        transition: opacity 0.3s ease;
+        transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease;
     }
 
 
     .sidebar-overlay.mobile-open {
-        display: block;
-
         opacity: 1;
+        visibility: visible;
         pointer-events: auto;
     }
 
 
-    .content {
+    /* =========================
+       ВНУТРИ SIDEBAR
+       ========================= */
+
+    .brand {
+        padding-top: 5px;
+        padding-right: 45px;
+    }
+
+    .navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nav-item {
+        flex: none;
         width: 100%;
         min-width: 0;
+    }
 
-        padding: 60px 15px 20px;
-        box-sizing: border-box;
+    .sidebar-bottom {
+        margin-top: auto;
     }
 
 
-    .app {
+    /* =========================
+       TOPBAR
+       ========================= */
+
+    .topbar {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    .topbar-actions {
         width: 100%;
-        min-width: 0;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+
+    /* =========================
+       КАРТОЧКИ
+       ========================= */
+
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    /* =========================
+       WELCOME
+       ========================= */
+
+    .welcome {
+        padding: 24px;
+    }
+
+    .welcome h2 {
+        font-size: 25px;
+    }
+
+
+    /* =========================
+       FRESHMAN
+       ========================= */
+
+    .freshman-banner {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .banner-button {
+        width: 100%;
+        text-align: center;
+    }
+
+
+    /* =========================
+       ТАБЛИЦЫ
+       ========================= */
+
+    .table-wrapper {
+        overflow-x: auto;
     }
 }
+
+
+/* =========================================
+   КОМПЬЮТЕР
+   ========================================= */
+
+@media (min-width: 651px) {
+
+    .mobile-menu-button,
+    .mobile-close-button,
+    .sidebar-overlay {
+        display: none !important;
+    }
+        }
