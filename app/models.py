@@ -46,7 +46,6 @@ class User(Base):
     teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(
         back_populates="teacher",
     )
-)
 
 
 class Group(Base):
