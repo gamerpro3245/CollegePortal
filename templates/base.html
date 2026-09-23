@@ -1,40 +1,448 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>{% block title %}Портал колледжа{% endblock %}</title>
 
-<title>{% block title %}Портал колледжа{% endblock %}</title>
-
-<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
-
-
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/css/style.css') }}"
+    >
 </head>
 
 <body>
 
 <div class="app">
 
+    <!-- Мобильная кнопка меню -->
 
-<button
-    class="mobile-menu-button"
-    id="mobileMenuButton"
-    type="button"
-    aria-label="Открыть меню"
->
-    ☰
-</button>
-
-<div
-    class="sidebar-overlay"
-    id="sidebarOverlay"
-></div>
+    <button
+        class="mobile-menu-button"
+        id="mobileMenuButton"
+        type="button"
+        aria-label="Открыть меню"
+    >
+        ☰
+    </button>
 
 
-<aside class="sidebar" id="sidebar">
+    <!-- Затемнение страницы при открытом мобильном меню -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- Боковая панель -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <button
+            class="mobile-close-button"
+            id="mobileCloseButton"
+            type="button"
+            aria-label="Закрыть меню"
+        >
+            ×
+        </button>
+
+
+        <!-- Логотип -->
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                К
+            </div>
+
+            <div>
+                <strong>Колледж</strong>
+                <span>Портал</span>
+            </div>
+
+        </div>
+
+
+        <!-- Навигация -->
+
+        <nav class="navigation">
+
+            <a href="/" class="nav-item">
+                <span>⌂</span>
+                Главная
+            </a>
+
+
+            <!-- Учёба -->
+
+            <details class="nav-dropdown">
+
+                <summary class="nav-item">
+                    <span>📚</span>
+                    Учёба
+                    <span class="dropdown-arrow">⌄</span>
+                </summary>
+
+                <div class="dropdown-menu">
+
+                    <a
+                        href="/schedule"
+                        class="dropdown-item"
+                    >
+                        📅 Расписание
+                    </a>
+
+                    <a
+                        href="/assignments"
+                        class="dropdown-item"
+                    >
+                        ✓ Задания
+                    </a>
+
+                    <a
+                        href="/grades"
+                        class="dropdown-item"
+                    >
+                        📊 Журнал
+                    </a>
+
+                    <a
+                        href="/attendance"
+                        class="dropdown-item"
+                    >
+                        ◷ Посещаемость
+                    </a>
+
+                    <a
+                        href="/materials"
+                        class="dropdown-item"
+                    >
+                        📚 Материалы
+                    </a>
+
+                </div>
+
+            </details>
+
+
+            <!-- Остальные разделы -->
+
+            <a
+                href="/announcements"
+                class="nav-item"
+            >
+                <span>!</span>
+                Объявления
+            </a>
+
+
+            <a
+                href="/freshman"
+                class="nav-item"
+            >
+                <span>🎓</span>
+                Первокурснику
+            </a>
+
+
+            <a
+                href="#"
+                class="nav-item"
+            >
+                <span>📄</span>
+                Справки
+            </a>
+
+        </nav>
+
+
+        <!-- Нижняя часть меню -->
+
+        <div class="sidebar-bottom">
+
+            {% if user %}
+
+                <a
+                    href="/"
+                    class="nav-item"
+                >
+                    <span>⌂</span>
+                    На главную
+                </a>
+
+
+                <a
+                    href="/logout"
+                    class="nav-item"
+                >
+                    <span>↪</span>
+                    Выйти
+                </a>
+
+
+                <!-- Профиль -->
+
+                <div class="profile-mini">
+
+                    <div class="avatar">
+                        {{ user.full_name[0] | upper }}
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            {{ user.full_name }}
+                        </strong>
+
+                        <span>
+
+                            {% if user.role == "student" %}
+
+                                Студент
+
+                            {% elif user.role == "teacher" %}
+
+                                Преподаватель
+
+                            {% elif user.role == "admin" %}
+
+                                Администратор
+
+                            {% else %}
+
+                                Пользователь
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            {% else %}
+
+
+                <a
+                    href="/login"
+                    class="nav-item"
+                >
+                    <span>⚙</span>
+                    Войти
+                </a>
+
+
+                <!-- Гость -->
+
+                <div class="profile-mini">
+
+                    <div class="avatar">
+                        Г
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Гость
+                        </strong>
+
+                        <span>
+                            Не авторизован
+                        </span>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </aside>
+
+
+    <!-- Основное содержимое -->
+
+    <main class="content">
+
+
+        <!-- Верхняя панель -->
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="page-label">
+                    Образовательный портал
+                </div>
+
+                <h1>
+                    {% block page_title %}
+                        Главная
+                    {% endblock %}
+                </h1>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+
+                <!-- Уведомления -->
+
+                <button
+                    class="icon-button"
+                    type="button"
+                    title="Уведомления"
+                >
+                    🔔
+                </button>
+
+
+                <!-- Пользователь -->
+
+                {% if user %}
+
+                    <span class="login-button">
+                        {{ user.full_name }}
+                    </span>
+
+                {% else %}
+
+                    <a
+                        href="/login"
+                        class="login-button"
+                    >
+                        Войти
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </header>
+
+
+        <!-- Контент страницы -->
+
+        {% block content %}{% endblock %}
+
+
+    </main>
+
+</div>
+
+
+<!-- Мобильное меню -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const menuButton =
+            document.getElementById(
+                "mobileMenuButton"
+            );
+
+        const closeButton =
+            document.getElementById(
+                "mobileCloseButton"
+            );
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+        const overlay =
+            document.getElementById(
+                "sidebarOverlay"
+            );
+
+
+        if (
+            !menuButton ||
+            !closeButton ||
+            !sidebar ||
+            !overlay
+        ) {
+            return;
+        }
+
+
+        function openMenu() {
+
+            sidebar.classList.add(
+                "mobile-open"
+            );
+
+            overlay.classList.add(
+                "mobile-open"
+            );
+
+        }
+
+
+        function closeMenu() {
+
+            sidebar.classList.remove(
+                "mobile-open"
+            );
+
+            overlay.classList.remove(
+                "mobile-open"
+            );
+
+        }
+
+
+        menuButton.addEventListener(
+            "click",
+            openMenu
+        );
+
+
+        closeButton.addEventListener(
+            "click",
+            closeMenu
+        );
+
+
+        overlay.addEventListener(
+            "click",
+            closeMenu
+        );
+
+
+        sidebar
+            .querySelectorAll("a")
+            .forEach(
+                function (link) {
+
+                    link.addEventListener(
+                        "click",
+                        closeMenu
+                    );
+
+                }
+            );
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html><aside class="sidebar" id="sidebar">
 
     <button
         class="mobile-close-button"
