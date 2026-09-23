@@ -263,86 +263,43 @@ async def teacher_dashboard(
     )
 @app.get("/schedule", response_class=HTMLResponse)
 async def schedule_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Расписание",
-            "page_description": "Здесь будет расписание занятий групп.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request))
 
 
 @app.get("/assignments", response_class=HTMLResponse)
 async def assignments_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Задания",
-            "page_description": "Здесь будут учебные задания и сроки их выполнения.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="assignments.html", context=template_context(request))
 
 
 @app.get("/grades", response_class=HTMLResponse)
 async def grades_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Оценки",
-            "page_description": "Здесь будут оценки студентов.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="grades.html", context=template_context(request))
 
 
 @app.get("/attendance", response_class=HTMLResponse)
 async def attendance_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Посещаемость",
-            "page_description": "Здесь будет учёт посещаемости.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="attendance.html", context=template_context(request))
 
 
 @app.get("/materials", response_class=HTMLResponse)
 async def materials_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Материалы",
-            "page_description": "Здесь будут учебные материалы.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="materials.html", context=template_context(request))
 
 
 @app.get("/announcements", response_class=HTMLResponse)
 async def announcements_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Объявления",
-            "page_description": "Здесь будут новости и объявления колледжа.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="announcements.html", context=template_context(request))
 
 
 @app.get("/freshman", response_class=HTMLResponse)
 async def freshman_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="placeholder.html",
-        context={
-            "page_title": "Первокурснику",
-            "page_description": "Полезная информация для студентов первого курса.",
-        },
-    )
+    return templates.TemplateResponse(request=request, name="freshman.html", context=template_context(request))
+
+
+@app.get("/certificates", response_class=HTMLResponse)
+async def certificates_page(request: Request):
+    return templates.TemplateResponse(request=request, name="certificates.html", context=template_context(request))
+
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(
