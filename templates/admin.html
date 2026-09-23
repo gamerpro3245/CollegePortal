@@ -1,4 +1,18 @@
-{% extends "base.html" %}{% block title %}Администрирование — CollegePortal{% endblock %}{% block page_title %}Администрирование{% endblock %}{% block content %}
-<section class="hero"><span class="hero-kicker">CONTROL CENTER / ADMIN</span><h2>Панель управления порталом</h2><p>Системные инструменты администратора собраны в одном рабочем пространстве. Активный модуль управления студентами доступен ниже.</p><div class="hero-meta"><span>Администратор</span><span>Система активна</span></div></section>
-<section class="admin-grid"><div class="admin-stat"><span>01 / ПОЛЬЗОВАТЕЛИ</span><strong>—</strong><small>Статистика подключится позже</small></div><div class="admin-stat"><span>02 / УЧЕБНЫЕ ГРУППЫ</span><strong>—</strong><small>Управление группами</small></div><div class="admin-stat"><span>03 / СИСТЕМА</span><strong>OK</strong><small>Портал доступен</small></div></section>
-<section class="panel"><div class="panel-header"><div><span class="panel-label">Инструменты</span><h3>Управление</h3></div></div><div class="admin-actions"><a class="admin-action" href="/admin/students"><strong>Студенты</strong><span>Создание, просмотр и удаление учебных аккаунтов.</span><b>Открыть →</b></a><div class="admin-action"><strong>Преподаватели</strong><span>Раздел управления преподавателями и назначениями.</span><b>Скоро</b></div><div class="admin-action"><strong>Группы</strong><span>Составы и учебные группы колледжа.</span><b>Скоро</b></div><div class="admin-action"><strong>Предметы</strong><span>Справочник учебных дисциплин.</span><b>Скоро</b></div></div></section>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Администрирование — CollegePortal{% endblock %}
+{% block page_title %}Администрирование{% endblock %}
+{% block content %}
+<section class="hero"><span class="hero-kicker">CONTROL CENTER / ADMIN</span><h2>Панель управления порталом</h2><p>Учебные данные теперь можно связывать в рабочую цепочку: группа → предмет → преподаватель → расписание.</p><div class="hero-meta"><span>Администратор</span><span>Система активна</span></div></section>
+<section class="admin-grid">
+  <div class="admin-stat"><span>01 / СТУДЕНТЫ</span><strong>{{ student_count }}</strong><small>Активные аккаунты</small></div>
+  <div class="admin-stat"><span>02 / ГРУППЫ</span><strong>{{ group_count }}</strong><small>Учебные группы</small></div>
+  <div class="admin-stat"><span>03 / ЗАНЯТИЯ</span><strong>{{ schedule_count }}</strong><small>В расписании</small></div>
+</section>
+<section class="panel"><div class="panel-header"><div><span class="panel-label">Инструменты</span><h3>Управление</h3></div></div>
+<div class="admin-actions">
+  <a class="admin-action" href="/admin/students"><strong>Студенты</strong><span>Создание, просмотр и удаление учебных аккаунтов.</span><b>Открыть →</b></a>
+  <a class="admin-action" href="/admin/schedule"><strong>Расписание</strong><span>Добавление занятий, кабинетов и преподавателей.</span><b>Открыть →</b></a>
+  <div class="admin-action"><strong>Преподаватели</strong><span>Раздел управления преподавателями и назначениями.</span><b>Следующий этап</b></div>
+  <div class="admin-action"><strong>Группы и предметы</strong><span>Справочники учебного процесса.</span><b>Следующий этап</b></div>
+</div></section>
+{% endblock %}
