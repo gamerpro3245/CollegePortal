@@ -91,3 +91,10 @@ button{cursor:pointer}
 @media(max-width:430px){
   .site-header{padding:0 11px}.page-content{padding:18px 11px 36px}.page-heading h1{font-size:23px}.quick-grid{gap:7px}.info-card{padding:11px;min-height:72px}.info-card strong{font-size:10px}.card-icon{width:32px;height:32px;min-width:32px}.panel{padding:13px}.toolbar-actions{grid-template-columns:1fr}.filter-button,.primary-button{min-height:39px}.mobile-sheet{padding-left:12px;padding-right:12px}
 }
+
+.quick-links{display:grid;gap:5px;margin-top:15px}
+.quick-links a{display:flex;align-items:center;gap:11px;padding:11px 9px;border-radius:11px}
+.quick-links a:hover{background:var(--surface-2)}
+.quick-links a>span{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:9px;font-weight:850}
+.quick-links a div{flex:1;min-width:0;display:flex;flex-direction:column}.quick-links strong{font-size:11px}.quick-links small{margin-top:2px;color:var(--muted);font-size:9px}.quick-links b{color:#a4adbb}
+@media(max-width:760px){.quick-links{margin-top:10px}.quick-links a{padding:9px 7px}}
