@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Расписание — Портал колледжа{% endblock %}
+{% block page_title %}Расписание{% endblock %}
+{% block content %}
+<section class="section-toolbar"><div><span class="panel-label">Учёба</span><h2>Расписание занятий</h2><p>Занятия по дням недели.</p></div><div class="toolbar-actions"><button class="filter-button active" type="button">Сегодня</button><button class="filter-button" type="button">Неделя</button></div></section>
+<section class="schedule-list">{% for day in ["Понедельник","Вторник","Среда","Четверг","Пятница"] %}<article class="day-card"><div class="day-title"><strong>{{ day }}</strong><span>Расписание пока не заполнено</span></div><div class="empty-row"><span>—</span><div><strong>Занятий нет</strong><small>Когда расписание будет добавлено, оно появится здесь.</small></div></div></article>{% endfor %}</section>
+{% endblock %}
