@@ -50,15 +50,51 @@
 </header>
 
 <div class="mobile-overlay" id="mobileOverlay"></div>
-<aside class="mobile-panel" id="mobilePanel">
-    <div class="mobile-panel-head"><strong>Навигация</strong><button class="mobile-close-button" id="mobileCloseButton" type="button">×</button></div>
-    <a href="/">⌂ Главная</a>
-    <details><summary>Учёба <span>⌄</span></summary>
-        <a href="/schedule">📅 Расписание</a><a href="/assignments">✓ Задания</a><a href="/grades">📊 Журнал</a><a href="/attendance">◷ Посещаемость</a><a href="/materials">📚 Материалы</a>
-    </details>
-    <details><summary>Колледж <span>⌄</span></summary><a href="/announcements">📢 Объявления</a><a href="/freshman">🎓 Первокурснику</a></details>
-    <details><summary>Документы <span>⌄</span></summary><a href="/certificates">📄 Справки</a></details>
-    {% if user %}<a href="/logout">↪ Выйти</a>{% else %}<a href="/login">Войти</a>{% endif %}
+<aside class="mobile-panel" id="mobilePanel" aria-label="Мобильная навигация">
+    <div class="mobile-panel-head">
+        <strong>Навигация</strong>
+        <button class="mobile-close-button" id="mobileCloseButton" type="button" aria-label="Закрыть меню">×</button>
+    </div>
+
+    <a class="mobile-nav-link" href="/">⌂ <span>Главная</span></a>
+
+    <div class="mobile-nav-group">
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
+            <span>📚 <b>Учёба</b></span><span class="mobile-nav-chevron">⌄</span>
+        </button>
+        <div class="mobile-nav-submenu">
+            <a href="/schedule">📅 <span>Расписание</span></a>
+            <a href="/assignments">✓ <span>Задания</span></a>
+            <a href="/grades">📊 <span>Журнал</span></a>
+            <a href="/attendance">◷ <span>Посещаемость</span></a>
+            <a href="/materials">📚 <span>Материалы</span></a>
+        </div>
+    </div>
+
+    <div class="mobile-nav-group">
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
+            <span>🏫 <b>Колледж</b></span><span class="mobile-nav-chevron">⌄</span>
+        </button>
+        <div class="mobile-nav-submenu">
+            <a href="/announcements">📢 <span>Объявления</span></a>
+            <a href="/freshman">🎓 <span>Первокурснику</span></a>
+        </div>
+    </div>
+
+    <div class="mobile-nav-group">
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
+            <span>📄 <b>Документы</b></span><span class="mobile-nav-chevron">⌄</span>
+        </button>
+        <div class="mobile-nav-submenu">
+            <a href="/certificates">📄 <span>Справки</span></a>
+        </div>
+    </div>
+
+    {% if user %}
+    <a class="mobile-nav-link mobile-logout" href="/logout">↪ <span>Выйти</span></a>
+    {% else %}
+    <a class="mobile-nav-link mobile-logout" href="/login">→ <span>Войти</span></a>
+    {% endif %}
 </aside>
 
 <main class="page-content">
@@ -67,15 +103,51 @@
 </main>
 
 <script>
-const panel=document.getElementById('mobilePanel');
-const overlay=document.getElementById('mobileOverlay');
-const open=()=>{panel.classList.add('open');overlay.classList.add('open');document.body.classList.add('menu-open')};
-const close=()=>{panel.classList.remove('open');overlay.classList.remove('open');document.body.classList.remove('menu-open')};
-document.getElementById('mobileMenuButton').addEventListener('click',open);
-document.getElementById('mobileCloseButton').addEventListener('click',close);
-overlay.addEventListener('click',close);
-document.querySelectorAll('.main-nav details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.main-nav details').forEach(x=>{if(x!==d)x.open=false})}));
-document.querySelectorAll('.mobile-panel details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.mobile-panel details').forEach(x=>{if(x!==d)x.open=false})}));
+const panel = document.getElementById('mobilePanel');
+const overlay = document.getElementById('mobileOverlay');
+const openMobileMenu = () => {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    document.body.classList.add('menu-open');
+};
+const closeMobileMenu = () => {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.classList.remove('menu-open');
+};
+document.getElementById('mobileMenuButton').addEventListener('click', openMobileMenu);
+document.getElementById('mobileCloseButton').addEventListener('click', closeMobileMenu);
+overlay.addEventListener('click', closeMobileMenu);
+
+document.querySelectorAll('.main-nav details').forEach(details => {
+    details.addEventListener('toggle', () => {
+        if (details.open) {
+            document.querySelectorAll('.main-nav details').forEach(other => {
+                if (other !== details) other.open = false;
+            });
+        }
+    });
+});
+
+document.querySelectorAll('.mobile-nav-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+        const group = button.closest('.mobile-nav-group');
+        const isOpen = group.classList.toggle('open');
+        button.setAttribute('aria-expanded', String(isOpen));
+
+        document.querySelectorAll('.mobile-nav-group').forEach(other => {
+            if (other !== group) {
+                other.classList.remove('open');
+                const otherButton = other.querySelector('.mobile-nav-toggle');
+                if (otherButton) otherButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+});
+
+document.querySelectorAll('.mobile-panel a').forEach(link => {
+    link.addEventListener('click', closeMobileMenu);
+});
 </script>
 </body>
 </html>
