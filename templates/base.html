@@ -8,10 +8,7 @@
 </head>
 <body>
 <header class="site-header">
-    <a class="brand" href="/">
-        <span class="brand-mark">К</span>
-        <span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span>
-    </a>
+    <a class="brand" href="/"><span class="brand-mark">К</span><span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span></a>
     <nav class="main-nav" aria-label="Основная навигация">
         <a class="main-nav-link" href="/">Главная</a>
         <details class="nav-menu">
@@ -44,16 +41,10 @@
         <details class="profile-menu">
             <summary><span class="avatar">{{ user.full_name[0] | upper }}</span><span class="profile-name">{{ user.full_name }}</span><span>⌄</span></summary>
             <div class="profile-dropdown">
-                <a href="/student">👤 Профиль</a>
-                <a href="#">⚙ Настройки</a>
-                <a href="#">🔔 Уведомления</a>
-                <a href="#">🔐 Безопасность</a>
-                <a href="/logout">↪ Выйти</a>
+                <a href="/student">👤 Профиль</a><a href="#">⚙ Настройки</a><a href="#">🔔 Уведомления</a><a href="#">🔐 Безопасность</a><a href="/logout">↪ Выйти</a>
             </div>
         </details>
-        {% else %}
-        <a href="/login" class="login-button">Войти</a>
-        {% endif %}
+        {% else %}<a href="/login" class="login-button">Войти</a>{% endif %}
     </div>
     <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню">☰</button>
 </header>
@@ -71,9 +62,7 @@
 </aside>
 
 <main class="page-content">
-    <div class="page-heading">
-        <div><span>ОБРАЗОВАТЕЛЬНЫЙ ПОРТАЛ</span><h1>{% block page_title %}Главная{% endblock %}</h1></div>
-    </div>
+    <div class="page-heading"><div><span>ОБРАЗОВАТЕЛЬНЫЙ ПОРТАЛ</span><h1>{% block page_title %}Главная{% endblock %}</h1></div></div>
     {% block content %}{% endblock %}
 </main>
 
@@ -86,6 +75,7 @@ document.getElementById('mobileMenuButton').addEventListener('click',open);
 document.getElementById('mobileCloseButton').addEventListener('click',close);
 overlay.addEventListener('click',close);
 document.querySelectorAll('.main-nav details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.main-nav details').forEach(x=>{if(x!==d)x.open=false})}));
+document.querySelectorAll('.mobile-panel details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.mobile-panel details').forEach(x=>{if(x!==d)x.open=false})}));
 </script>
 </body>
 </html>
