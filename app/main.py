@@ -1,418 +1,219 @@
-from fastapi import (
-    Cookie,
-    Depends,
-    FastAPI,
-    Form,
-    HTTPException,
-    Request,
-)
+from fastapi import Cookie, Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session, joinedload
 import jwt
 
-from app.auth import (
-    ALGORITHM,
-    SECRET_KEY,
-    create_access_token,
-    get_user_by_username,
-    verify_password,
-    password_hash,
-)
-from app.database import get_db
-from app.models import TeachingAssignment, User, Group
-app = FastAPI(title="Портал колледжа")
-app.mount(
-    "/static",
-    StaticFiles(directory="static"),
-    name="static"
-)
+from app.auth import ALGORITHM, SECRET_KEY, create_access_token, get_user_by_username, verify_password, password_hash
+from app.database import Base, engine, get_db
+from app.models import Group, ScheduleEntry, Subject, TeachingAssignment, User
 
-templates = Jinja2Templates(
-    directory="templates",
-    context_processors=[
-        lambda request: {
-            "user": getattr(request.state, "user", None)
-        }
-    ],
-)
+app = FastAPI(title="Портал колледжа")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates", context_processors=[lambda request: {"user": getattr(request.state, "user", None)}])
+
+@app.on_event("startup")
+def ensure_database_schema():
+    Base.metadata.create_all(bind=engine)
+
 @app.middleware("http")
 async def load_current_user(request: Request, call_next):
     db = next(get_db())
-
     try:
-        access_token = request.cookies.get("access_token")
-        request.state.user = get_current_user(access_token, db)
-
-        response = await call_next(request)
-        return response
+        request.state.user = get_current_user(request.cookies.get("access_token"), db)
+        return await call_next(request)
     finally:
         db.close()
+
 def template_context(request: Request, **extra):
-    context = {
-        "user": getattr(request.state, "user", None),
-    }
+    context = {"user": getattr(request.state, "user", None)}
     context.update(extra)
     return context
-def get_current_user(
-    access_token: str | None,
-    db: Session,
-):
+
+def get_current_user(access_token: str | None, db: Session):
     if not access_token:
         return None
-
     try:
-        payload = jwt.decode(
-            access_token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-        )
-
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
-
         if not username:
             return None
-
-        user = db.scalars(
-            select(User).where(User.username == username)
-        ).first()
-
-        if not user or not user.is_active:
-            return None
-
-        return user
-
+        user = db.scalars(select(User).where(User.username == username)).first()
+        return user if user and user.is_active else None
     except jwt.PyJWTError:
         return None
-def require_admin(
-    access_token: str | None,
-    db: Session,
-):
+
+def require_admin(access_token: str | None, db: Session):
     user = get_current_user(access_token, db)
-
-    if not user or user.role != "admin":
-        return None
-
-    return user
-
+    return user if user and user.role == "admin" else None
 
 @app.get("/", response_class=HTMLResponse)
-async def home(
-    request: Request,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
-    user = get_current_user(access_token, db)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={
-            "user": user,
-        },
-    )
+async def home(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request=request, name="index.html", context={"user": get_current_user(access_token, db)})
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="login.html",
-        context={}
-    )
-
+    return templates.TemplateResponse(request=request, name="login.html", context={})
 
 @app.post("/login")
-async def login(
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db),
-):
+async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = get_user_by_username(db, username)
-
-    if (
-        not user
-        or not user.is_active
-        or not verify_password(
-            password,
-            user.password_hash,
-        )
-    ):
-        return RedirectResponse(
-            url="/login?error=1",
-            status_code=303,
-        )
-
-    token = create_access_token(
-        username=user.username,
-        role=user.role,
-    )
-
-    if user.role == "student":
-        redirect_url = "/student"
-    elif user.role == "teacher":
-        redirect_url = "/teacher"
-    elif user.role == "admin":
-        redirect_url = "/admin"
-    else:
-        redirect_url = "/"
-
-    response = RedirectResponse(
-        url=redirect_url,
-        status_code=303,
-    )
-
-    response.set_cookie(
-    key="access_token",
-    value=token,
-    httponly=True,
-    samesite="lax",
-    path="/",
-    )
-
+    if not user or not user.is_active or not verify_password(password, user.password_hash):
+        return RedirectResponse(url="/login?error=1", status_code=303)
+    token = create_access_token(username=user.username, role=user.role)
+    response = RedirectResponse(url={"student": "/student", "teacher": "/teacher", "admin": "/admin"}.get(user.role, "/"), status_code=303)
+    response.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", path="/")
     return response
 
 @app.get("/student", response_class=HTMLResponse)
-async def student_dashboard(
-    request: Request,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
+async def student_dashboard(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = get_current_user(access_token, db)
-
     if not user or user.role != "student":
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
+        return RedirectResponse(url="/login", status_code=303)
+    return templates.TemplateResponse(request=request, name="student.html", context={"user": user})
 
-    return templates.TemplateResponse(
-        request=request,
-        name="student.html",
-        context={
-            "user": user,
-        },
-    )
-
-@app.post("/admin/students/{student_id}/delete")
-async def admin_delete_student(
-    student_id: int,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
-    user = require_admin(access_token, db)
-
-    if not user:
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
-
-    student = db.scalars(
-        select(User).where(
-            User.id == student_id,
-            User.role == "student",
-        )
-    ).first()
-
-    if not student:
-        return RedirectResponse(
-            url="/admin/students?error=not_found",
-            status_code=303,
-        )
-
-    db.delete(student)
-    db.commit()
-
-    return RedirectResponse(
-        url="/admin/students",
-        status_code=303,
-    )
 @app.get("/teacher", response_class=HTMLResponse)
-async def teacher_dashboard(
-    request: Request,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
+async def teacher_dashboard(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = get_current_user(access_token, db)
-
     if not user or user.role != "teacher":
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
+        return RedirectResponse(url="/login", status_code=303)
+    assignments = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == user.id, TeachingAssignment.is_active.is_(True)).options(joinedload(TeachingAssignment.subject), joinedload(TeachingAssignment.group)).order_by(TeachingAssignment.id)).all()
+    return templates.TemplateResponse(request=request, name="teacher.html", context={"user": user, "assignments": assignments})
 
-    assignments = db.scalars(
-        select(TeachingAssignment)
-        .where(
-            TeachingAssignment.teacher_id == user.id,
-            TeachingAssignment.is_active.is_(True),
-        )
-        .order_by(TeachingAssignment.id)
-    ).all()
-
-    return templates.TemplateResponse(
-        request=request,
-        name="teacher.html",
-        context={
-            "user": user,
-            "assignments": assignments,
-        },
-    )
 @app.get("/schedule", response_class=HTMLResponse)
-async def schedule_page(request: Request):
-    return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request))
-
+async def schedule_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    query = select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher)).order_by(ScheduleEntry.day_of_week, ScheduleEntry.start_time)
+    if user.role == "student":
+        entries = db.scalars(query.where(ScheduleEntry.group_id == user.group_id)).all() if user.group_id else []
+    elif user.role == "teacher":
+        entries = db.scalars(query.where(ScheduleEntry.teacher_id == user.id)).all()
+    else:
+        entries = db.scalars(query).all()
+    days = [(0, "Понедельник"), (1, "Вторник"), (2, "Среда"), (3, "Четверг"), (4, "Пятница")]
+    schedule_by_day = {day_id: [] for day_id, _ in days}
+    for entry in entries:
+        schedule_by_day[entry.day_of_week].append(entry)
+    return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request, days=days, schedule_by_day=schedule_by_day, schedule_entries=entries))
 
 @app.get("/assignments", response_class=HTMLResponse)
 async def assignments_page(request: Request):
     return templates.TemplateResponse(request=request, name="assignments.html", context=template_context(request))
 
-
 @app.get("/grades", response_class=HTMLResponse)
 async def grades_page(request: Request):
     return templates.TemplateResponse(request=request, name="grades.html", context=template_context(request))
-
 
 @app.get("/attendance", response_class=HTMLResponse)
 async def attendance_page(request: Request):
     return templates.TemplateResponse(request=request, name="attendance.html", context=template_context(request))
 
-
 @app.get("/materials", response_class=HTMLResponse)
 async def materials_page(request: Request):
     return templates.TemplateResponse(request=request, name="materials.html", context=template_context(request))
-
 
 @app.get("/announcements", response_class=HTMLResponse)
 async def announcements_page(request: Request):
     return templates.TemplateResponse(request=request, name="announcements.html", context=template_context(request))
 
-
 @app.get("/freshman", response_class=HTMLResponse)
 async def freshman_page(request: Request):
     return templates.TemplateResponse(request=request, name="freshman.html", context=template_context(request))
-
 
 @app.get("/certificates", response_class=HTMLResponse)
 async def certificates_page(request: Request):
     return templates.TemplateResponse(request=request, name="certificates.html", context=template_context(request))
 
-
 @app.get("/admin", response_class=HTMLResponse)
-async def admin_dashboard(
-    request: Request,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
+async def admin_dashboard(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
-
     if not user:
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
-
-    return templates.TemplateResponse(
-        request=request,
-        name="admin.html",
-        context={
-            "user": user,
-        },
-    )
+        return RedirectResponse(url="/login", status_code=303)
+    student_count = len(db.scalars(select(User.id).where(User.role == "student", User.is_active.is_(True))).all())
+    group_count = len(db.scalars(select(Group.id).where(Group.is_active.is_(True))).all())
+    schedule_count = len(db.scalars(select(ScheduleEntry.id).where(ScheduleEntry.is_active.is_(True))).all())
+    return templates.TemplateResponse(request=request, name="admin.html", context={"user": user, "student_count": student_count, "group_count": group_count, "schedule_count": schedule_count})
 
 @app.get("/admin/students", response_class=HTMLResponse)
-async def admin_students(
-    request: Request,
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
+async def admin_students(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
-
     if not user:
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
-
-    students = db.scalars(
-        select(User)
-        .where(User.role == "student")
-        .order_by(User.full_name)
-    ).all()
-
-    groups = db.scalars(
-        select(Group)
-        .where(Group.is_active.is_(True))
-        .order_by(Group.name)
-    ).all()
-
-    return templates.TemplateResponse(
-        request=request,
-        name="admin_students.html",
-        context={
-            "user": user,
-            "students": students,
-            "groups": groups,
-        },
-    )
+        return RedirectResponse(url="/login", status_code=303)
+    students = db.scalars(select(User).where(User.role == "student").options(joinedload(User.group)).order_by(User.full_name)).all()
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
+    return templates.TemplateResponse(request=request, name="admin_students.html", context={"user": user, "students": students, "groups": groups})
 
 @app.post("/admin/students/create")
-async def admin_create_student(
-    full_name: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...),
-    group_id: int | None = Form(default=None),
-    access_token: str | None = Cookie(default=None),
-    db: Session = Depends(get_db),
-):
+async def admin_create_student(full_name: str = Form(...), username: str = Form(...), password: str = Form(...), group_id: int | None = Form(default=None), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
-
     if not user:
-        return RedirectResponse(
-            url="/login",
-            status_code=303,
-        )
-
-    existing_user = db.scalars(
-        select(User).where(User.username == username)
-    ).first()
-
-    if existing_user:
-        return RedirectResponse(
-            url="/admin/students?error=username",
-            status_code=303,
-        )
-
-    student = User(
-        username=username,
-        password_hash=password_hash.hash(password),
-        full_name=full_name,
-        role="student",
-        group_id=group_id,
-        is_active=True,
-    )
-
-    db.add(student)
+        return RedirectResponse(url="/login", status_code=303)
+    if db.scalars(select(User).where(User.username == username)).first():
+        return RedirectResponse(url="/admin/students?error=username", status_code=303)
+    db.add(User(username=username, password_hash=password_hash.hash(password), full_name=full_name, role="student", group_id=group_id, is_active=True))
     db.commit()
+    return RedirectResponse(url="/admin/students", status_code=303)
 
-    return RedirectResponse(
-        url="/admin/students",
-        status_code=303,
-    )
+@app.get("/admin/schedule", response_class=HTMLResponse)
+async def admin_schedule(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
+    subjects = db.scalars(select(Subject).where(Subject.is_active.is_(True)).order_by(Subject.name)).all()
+    teachers = db.scalars(select(User).where(User.role == "teacher", User.is_active.is_(True)).order_by(User.full_name)).all()
+    entries = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher)).order_by(ScheduleEntry.day_of_week, ScheduleEntry.start_time)).all()
+    return templates.TemplateResponse(request=request, name="admin_schedule.html", context={"user": user, "groups": groups, "subjects": subjects, "teachers": teachers, "entries": entries})
+
+@app.post("/admin/schedule/create")
+async def admin_create_schedule(group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    if day_of_week not in range(5) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
+        return RedirectResponse(url="/admin/schedule?error=time", status_code=303)
+    group, subject, teacher = db.get(Group, group_id), db.get(Subject, subject_id), db.get(User, teacher_id)
+    if not group or not subject or not teacher or teacher.role != "teacher":
+        return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
+    assignment = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == teacher_id, TeachingAssignment.subject_id == subject_id, TeachingAssignment.group_id == group_id, TeachingAssignment.is_active.is_(True))).first()
+    if not assignment:
+        return RedirectResponse(url="/admin/schedule?error=assignment", status_code=303)
+    conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.group_id == group_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
+    if conflict:
+        return RedirectResponse(url="/admin/schedule?error=conflict", status_code=303)
+    db.add(ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True))
+    db.commit()
+    return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
+
+@app.post("/admin/schedule/{entry_id}/delete")
+async def admin_delete_schedule(entry_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    entry = db.get(ScheduleEntry, entry_id)
+    if entry:
+        entry.is_active = False
+        db.commit()
+    return RedirectResponse(url="/admin/schedule", status_code=303)
+
+@app.post("/admin/students/{student_id}/delete")
+async def admin_delete_student(student_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    student = db.scalars(select(User).where(User.id == student_id, User.role == "student")).first()
+    if not student:
+        return RedirectResponse(url="/admin/students?error=not_found", status_code=303)
+    db.delete(student)
+    db.commit()
+    return RedirectResponse(url="/admin/students", status_code=303)
 
 @app.get("/logout")
 async def logout():
-    response = RedirectResponse(
-        url="/login",
-        status_code=303,
-    )
-
-    response.delete_cookie(
-        key="access_token",
-        path="/",
-    )
-
+    response = RedirectResponse(url="/login", status_code=303)
+    response.delete_cookie(key="access_token", path="/")
     return response
