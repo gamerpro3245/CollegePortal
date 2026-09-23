@@ -3,18 +3,40 @@
 {% block page_title %}Главная{% endblock %}
 {% block content %}
 <section class="quick-grid">
-    <a href="/assignments" class="info-card"><span class="card-icon">✓</span><div><span class="card-label">Учёба</span><strong>Задания</strong></div><span class="card-arrow">→</span></a>
-    <a href="/grades" class="info-card"><span class="card-icon">📊</span><div><span class="card-label">Результаты</span><strong>Журнал</strong></div><span class="card-arrow">→</span></a>
-    <a href="/attendance" class="info-card"><span class="card-icon">◷</span><div><span class="card-label">Контроль</span><strong>Посещаемость</strong></div><span class="card-arrow">→</span></a>
-    <a href="/materials" class="info-card"><span class="card-icon">📚</span><div><span class="card-label">Учёба</span><strong>Материалы</strong></div><span class="card-arrow">→</span></a>
+    <a href="/schedule" class="info-card"><span class="card-icon">01</span><div><span class="card-label">Учёба</span><strong>Расписание</strong></div><span class="card-arrow">→</span></a>
+    <a href="/assignments" class="info-card"><span class="card-icon">02</span><div><span class="card-label">Учёба</span><strong>Задания</strong></div><span class="card-arrow">→</span></a>
+    <a href="/grades" class="info-card"><span class="card-icon">03</span><div><span class="card-label">Результаты</span><strong>Журнал</strong></div><span class="card-arrow">→</span></a>
+    <a href="/materials" class="info-card"><span class="card-icon">04</span><div><span class="card-label">Учёба</span><strong>Материалы</strong></div><span class="card-arrow">→</span></a>
 </section>
+
 <section class="dashboard-grid">
-    <article class="panel"><div class="panel-header"><div><span class="panel-label">Колледж</span><h3>Объявления</h3></div><a href="/announcements">Все →</a></div><div class="empty-state"><div class="empty-icon">📢</div><strong>Пока нет объявлений</strong><p>Новые сообщения колледжа будут отображаться здесь.</p></div></article>
-    <article class="panel"><div class="panel-header"><div><span class="panel-label">Навигация</span><h3>Разделы портала</h3></div></div><div class="menu-hint"><div class="menu-hint-icon">☰</div><strong>Всё нужное — в верхнем меню</strong><p>Нажми «Учёба», «Колледж» или «Документы» — список откроется прямо на странице.</p></div></article>
+    <article class="panel">
+        <div class="panel-header">
+            <div><span class="panel-label">Колледж</span><h3>Объявления</h3></div>
+            <a href="/announcements">Все →</a>
+        </div>
+        <div class="empty-state">
+            <div class="empty-icon">—</div>
+            <strong>Пока нет объявлений</strong>
+            <p>Новые сообщения колледжа будут отображаться здесь.</p>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div><span class="panel-label">Быстрый доступ</span><h3>Ещё разделы</h3></div>
+        </div>
+        <div class="quick-links">
+            <a href="/attendance"><span>05</span><div><strong>Посещаемость</strong><small>Учёт посещения</small></div><b>→</b></a>
+            <a href="/freshman"><span>06</span><div><strong>Первокурснику</strong><small>Полезная информация</small></div><b>→</b></a>
+            <a href="/certificates"><span>07</span><div><strong>Справки</strong><small>Запрос документов</small></div><b>→</b></a>
+        </div>
+    </article>
 </section>
+
 <section class="feature-row">
-    <a href="/announcements" class="feature-card"><span>📢</span><div><strong>Объявления</strong><p>Новости и сообщения колледжа.</p></div><b>→</b></a>
-    <a href="/freshman" class="feature-card"><span>🎓</span><div><strong>Первокурснику</strong><p>Инструкции и полезная информация.</p></div><b>→</b></a>
-    <a href="/certificates" class="feature-card"><span>📄</span><div><strong>Справки</strong><p>Запрос и отслеживание документов.</p></div><b>→</b></a>
+    <a href="/announcements" class="feature-card"><span>01</span><div><strong>Объявления</strong><p>Новости и сообщения колледжа.</p></div><b>→</b></a>
+    <a href="/freshman" class="feature-card"><span>02</span><div><strong>Первокурснику</strong><p>Инструкции и полезная информация.</p></div><b>→</b></a>
+    <a href="/certificates" class="feature-card"><span>03</span><div><strong>Справки</strong><p>Запрос и отслеживание документов.</p></div><b>→</b></a>
 </section>
 {% endblock %}
