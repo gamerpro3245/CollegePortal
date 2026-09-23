@@ -8,37 +8,11 @@
 </head>
 <body>
 <header class="site-header">
+    <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button>
     <a class="brand" href="/">
         <span class="brand-mark">К</span>
         <span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span>
     </a>
-
-    <nav class="main-nav" aria-label="Основная навигация">
-        <a class="main-nav-link" href="/">Главная</a>
-        <details class="nav-menu">
-            <summary>Учёба <span>⌄</span></summary>
-            <div class="nav-dropdown-panel">
-                <a href="/schedule"><b>01</b><span><strong>Расписание</strong><small>Занятия по дням</small></span></a>
-                <a href="/assignments"><b>02</b><span><strong>Задания</strong><small>Учебные задания</small></span></a>
-                <a href="/grades"><b>03</b><span><strong>Журнал</strong><small>Оценки и результаты</small></span></a>
-                <a href="/attendance"><b>04</b><span><strong>Посещаемость</strong><small>Учёт посещения</small></span></a>
-                <a href="/materials"><b>05</b><span><strong>Материалы</strong><small>Файлы и документы</small></span></a>
-            </div>
-        </details>
-        <details class="nav-menu">
-            <summary>Колледж <span>⌄</span></summary>
-            <div class="nav-dropdown-panel">
-                <a href="/announcements"><b>06</b><span><strong>Объявления</strong><small>Новости колледжа</small></span></a>
-                <a href="/freshman"><b>07</b><span><strong>Первокурснику</strong><small>Полезная информация</small></span></a>
-            </div>
-        </details>
-        <details class="nav-menu">
-            <summary>Документы <span>⌄</span></summary>
-            <div class="nav-dropdown-panel">
-                <a href="/certificates"><b>08</b><span><strong>Справки</strong><small>Запрос и статус документов</small></span></a>
-            </div>
-        </details>
-    </nav>
 
     <div class="header-actions">
         <button class="header-icon" type="button" title="Уведомления" aria-label="Уведомления">●</button>
@@ -53,13 +27,10 @@
         <a href="/login" class="login-button">Войти</a>
         {% endif %}
     </div>
-
-    <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button>
 </header>
 
 <div class="mobile-sheet-backdrop" id="mobileBackdrop"></div>
-<section class="mobile-sheet" id="mobileSheet" aria-label="Мобильная навигация" aria-hidden="true">
-    <div class="mobile-sheet-handle"></div>
+<section class="mobile-sheet" id="mobileSheet" aria-label="Навигация" aria-hidden="true">
     <div class="mobile-sheet-head">
         <div><span>ПОРТАЛ</span><strong>Навигация</strong></div>
         <button class="mobile-close-button" id="mobileCloseButton" type="button" aria-label="Закрыть меню">×</button>
@@ -133,16 +104,6 @@ function closeMobileMenu() {
 menuButton.addEventListener('click', openMobileMenu);
 closeButton.addEventListener('click', closeMobileMenu);
 backdrop.addEventListener('click', closeMobileMenu);
-
-document.querySelectorAll('.main-nav details').forEach(details => {
-    details.addEventListener('toggle', () => {
-        if (details.open) {
-            document.querySelectorAll('.main-nav details').forEach(other => {
-                if (other !== details) other.open = false;
-            });
-        }
-    });
-});
 
 document.querySelectorAll('.mobile-nav-toggle').forEach(button => {
     button.addEventListener('click', () => {
