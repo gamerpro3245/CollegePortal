@@ -7,138 +7,77 @@ from app.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        autoincrement=True,
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    full_name: Mapped[str] = mapped_column(String(150))
+    role: Mapped[str] = mapped_column(String(20))
+    group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    username: Mapped[str] = mapped_column(
-        String(50),
-        unique=True,
-        index=True,
-    )
-
-    password_hash: Mapped[str] = mapped_column(
-        String(255),
-    )
-
-    full_name: Mapped[str] = mapped_column(
-        String(150),
-    )
-
-    role: Mapped[str] = mapped_column(
-        String(20),
-    )
-
-    group_id: Mapped[int | None] = mapped_column(
-        ForeignKey("groups.id"),
-        nullable=True,
-    )
-
-    is_active: Mapped[bool] = mapped_column(
-        default=True,
-    )
-
-    group: Mapped["Group | None"] = relationship(
-        back_populates="students",
-    )
-
-    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(
-        back_populates="teacher",
-    )
+    group: Mapped["Group | None"] = relationship(back_populates="students")
+    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(back_populates="teacher")
 
 
 class Group(Base):
     __tablename__ = "groups"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        autoincrement=True,
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    name: Mapped[str] = mapped_column(
-        String(50),
-        unique=True,
-        index=True,
-    )
-
-    is_active: Mapped[bool] = mapped_column(
-        default=True,
-    )
-
-    students: Mapped[list["User"]] = relationship(
-        back_populates="group",
-    )
-
-    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(
-        back_populates="group",
-    )
+    students: Mapped[list["User"]] = relationship(back_populates="group")
+    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(back_populates="group")
+    schedule_entries: Mapped[list["ScheduleEntry"]] = relationship(back_populates="group")
 
 
 class Subject(Base):
     __tablename__ = "subjects"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        autoincrement=True,
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    code: Mapped[str | None] = mapped_column(String(30), unique=True, nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    name: Mapped[str] = mapped_column(
-        String(100),
-        unique=True,
-        index=True,
-    )
-
-    code: Mapped[str | None] = mapped_column(
-        String(30),
-        unique=True,
-        nullable=True,
-    )
-
-    is_active: Mapped[bool] = mapped_column(
-        default=True,
-    )
-
-    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(
-        back_populates="subject",
-    )
+    teaching_assignments: Mapped[list["TeachingAssignment"]] = relationship(back_populates="subject")
+    schedule_entries: Mapped[list["ScheduleEntry"]] = relationship(back_populates="subject")
 
 
 class TeachingAssignment(Base):
     __tablename__ = "teaching_assignments"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        autoincrement=True,
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False)
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    teacher_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False,
-    )
+    teacher: Mapped["User"] = relationship(back_populates="teaching_assignments")
+    subject: Mapped["Subject"] = relationship(back_populates="teaching_assignments")
+    group: Mapped["Group"] = relationship(back_populates="teaching_assignments")
+    schedule_entries: Mapped[list["ScheduleEntry"]] = relationship(back_populates="teaching_assignment")
 
-    subject_id: Mapped[int] = mapped_column(
-        ForeignKey("subjects.id"),
-        nullable=False,
-    )
 
-    group_id: Mapped[int] = mapped_column(
-        ForeignKey("groups.id"),
-        nullable=False,
-    )
+class ScheduleEntry(Base):
+    __tablename__ = "schedule_entries"
 
-    is_active: Mapped[bool] = mapped_column(
-        default=True,
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False, index=True)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False, index=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    teaching_assignment_id: Mapped[int | None] = mapped_column(
+        ForeignKey("teaching_assignments.id"), nullable=True
     )
+    day_of_week: Mapped[int] = mapped_column(nullable=False, index=True)
+    start_time: Mapped[str] = mapped_column(String(5), nullable=False)
+    end_time: Mapped[str] = mapped_column(String(5), nullable=False)
+    room: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    lesson_type: Mapped[str] = mapped_column(String(30), default="Занятие")
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    teacher: Mapped["User"] = relationship(
-        back_populates="teaching_assignments",
-    )
-
-    subject: Mapped["Subject"] = relationship(
-        back_populates="teaching_assignments",
-    )
-
-    group: Mapped["Group"] = relationship(
-        back_populates="teaching_assignments",
+    group: Mapped["Group"] = relationship(back_populates="schedule_entries")
+    subject: Mapped["Subject"] = relationship(back_populates="schedule_entries")
+    teacher: Mapped["User"] = relationship()
+    teaching_assignment: Mapped["TeachingAssignment | None"] = relationship(
+        back_populates="schedule_entries"
     )
