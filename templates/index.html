@@ -1,163 +1,24 @@
 {% extends "base.html" %}
-
 {% block title %}Главная — Портал колледжа{% endblock %}
-
 {% block page_title %}Главная{% endblock %}
-
 {% block content %}
-
-<section class="welcome">
-
-    <div>
-        <span class="welcome-label">Добро пожаловать 👋</span>
-
-        <h2>
-            Всё необходимое для учёбы —
-            в одном месте.
-        </h2>
-
-        <p>
-            Расписание, задания, оценки, объявления
-            и учебные материалы колледжа.
-        </p>
-    </div>
-
+<section class="dashboard-intro">
+    <div><span class="eyebrow">Личный кабинет</span><h2>Всё для учёбы — в одном месте.</h2><p>Расписание, задания, оценки, объявления и материалы доступны из единой панели.</p></div>
+    <a class="primary-button" href="/schedule">Открыть расписание <span>→</span></a>
 </section>
-
-
 <section class="quick-grid">
-
-    <a href="/schedule" class="info-card">
-
-        <span class="card-icon">📅</span>
-
-        <div>
-            <span class="card-label">Сегодня</span>
-            <strong>Расписание</strong>
-        </div>
-
-        <span class="card-value">→</span>
-
-    </a>
-
-
-    <a href="/assignments" class="info-card">
-
-        <span class="card-icon">📚</span>
-
-        <div>
-            <span class="card-label">Учёба</span>
-            <strong>Задания</strong>
-        </div>
-
-        <span class="card-value">→</span>
-
-    </a>
-
-
-    <a href="/announcements" class="info-card">
-
-        <span class="card-icon">📢</span>
-
-        <div>
-            <span class="card-label">Новости</span>
-            <strong>Объявления</strong>
-        </div>
-
-        <span class="card-value">→</span>
-
-    </a>
-
+    <a href="/schedule" class="info-card"><span class="card-icon">📅</span><div><span class="card-label">Учёба</span><strong>Расписание</strong></div><span class="card-arrow">→</span></a>
+    <a href="/assignments" class="info-card"><span class="card-icon">✓</span><div><span class="card-label">Учёба</span><strong>Задания</strong></div><span class="card-arrow">→</span></a>
+    <a href="/grades" class="info-card"><span class="card-icon">📊</span><div><span class="card-label">Результаты</span><strong>Журнал</strong></div><span class="card-arrow">→</span></a>
+    <a href="/attendance" class="info-card"><span class="card-icon">◷</span><div><span class="card-label">Контроль</span><strong>Посещаемость</strong></div><span class="card-arrow">→</span></a>
 </section>
-
-
 <section class="dashboard-grid">
-
-    <article class="panel">
-
-        <div class="panel-header">
-
-            <div>
-                <span class="panel-label">Сегодня</span>
-                <h3>Расписание</h3>
-            </div>
-
-            <a href="/schedule">
-                Открыть всё →
-            </a>
-
-        </div>
-
-        <div class="empty-state">
-
-            <div class="empty-icon">📅</div>
-
-            <strong>Расписание пока недоступно</strong>
-
-            <p>
-                После входа здесь появится расписание вашей группы.
-            </p>
-
-        </div>
-
-    </article>
-
-
-    <article class="panel">
-
-        <div class="panel-header">
-
-            <div>
-                <span class="panel-label">Новости колледжа</span>
-                <h3>Объявления</h3>
-            </div>
-
-            <a href="/announcements">
-                Все →
-            </a>
-
-        </div>
-
-        <div class="empty-state">
-
-            <div class="empty-icon">📢</div>
-
-            <strong>Пока нет объявлений</strong>
-
-            <p>
-                Новые сообщения колледжа появятся здесь.
-            </p>
-
-        </div>
-
-    </article>
-
+    <article class="panel"><div class="panel-header"><div><span class="panel-label">Сегодня</span><h3>Расписание</h3></div><a href="/schedule">Открыть всё →</a></div><div class="empty-state"><div class="empty-icon">📅</div><strong>Расписание пока не заполнено</strong><p>Здесь появятся занятия вашей группы после подключения учебных данных.</p></div></article>
+    <article class="panel"><div class="panel-header"><div><span class="panel-label">Колледж</span><h3>Объявления</h3></div><a href="/announcements">Все →</a></div><div class="empty-state"><div class="empty-icon">📢</div><strong>Пока нет объявлений</strong><p>Новые сообщения колледжа будут отображаться здесь.</p></div></article>
 </section>
-
-
-<section class="freshman-banner">
-
-    <div class="freshman-icon">🎓</div>
-
-    <div>
-
-        <span>Новый студент?</span>
-
-        <h3>
-            Загляни в раздел «Первокурснику»
-        </h3>
-
-        <p>
-            Справочная информация, полезные инструкции
-            и ответы на частые вопросы.
-        </p>
-
-    </div>
-
-    <a href="/freshman" class="banner-button">
-        Перейти →
-    </a>
-
+<section class="feature-row">
+    <a href="/materials" class="feature-card"><span>📚</span><div><strong>Учебные материалы</strong><p>Файлы и материалы по предметам.</p></div><b>→</b></a>
+    <a href="/freshman" class="feature-card"><span>🎓</span><div><strong>Первокурснику</strong><p>Инструкции и полезная информация.</p></div><b>→</b></a>
+    <a href="/certificates" class="feature-card"><span>📄</span><div><strong>Справки</strong><p>Запрос и отслеживание документов.</p></div><b>→</b></a>
 </section>
-
 {% endblock %}
