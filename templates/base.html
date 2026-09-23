@@ -1,130 +1,54 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Портал колледжа{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#111827">
+<title>{% block title %}CollegePortal{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}?v=4">
 </head>
 <body>
-<header class="site-header">
-    <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button>
-    <a class="brand" href="/">
-        <span class="brand-mark">К</span>
-        <span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span>
-    </a>
+<header class="topbar">
+<div class="topbar-left">
+<button class="menu-button" id="mobileMenuButton" type="button" aria-label="Открыть навигацию" aria-expanded="false"><span></span><span></span><span></span></button>
+<a class="brand" href="/"><span class="brand-mark">CP</span><span class="brand-text"><strong>CollegePortal</strong><small>Образовательная система</small></span></a>
+</div>
+<div class="topbar-right">
+{% if user %}
+<a class="notification-button" href="/announcements" aria-label="Объявления"><span></span></a>
+<details class="account-menu"><summary><span class="account-avatar">{{ user.full_name[0] | upper }}</span><span class="account-copy"><strong>{{ user.full_name }}</strong><small>{{ user.role }}</small></span><b>⌄</b></summary>
+<div class="account-dropdown">
+{% if user.role == "student" %}<a href="/student">Личный кабинет</a>{% elif user.role == "teacher" %}<a href="/teacher">Рабочий кабинет</a>{% else %}<a href="/admin">Админ-панель</a>{% endif %}
+<a href="/announcements">Объявления</a><a href="/logout" class="danger-link">Выйти</a>
+</div></details>
+{% else %}<a class="login-top-button" href="/login">Войти</a>{% endif %}
+</div></header>
 
-    <div class="header-actions">
-        <button class="header-icon" type="button" title="Уведомления" aria-label="Уведомления">●</button>
-        {% if user %}
-        <details class="profile-menu">
-            <summary><span class="avatar">{{ user.full_name[0] | upper }}</span><span class="profile-name">{{ user.full_name }}</span><span>⌄</span></summary>
-            <div class="profile-dropdown">
-                <a href="/student">Профиль</a><a href="#">Настройки</a><a href="#">Уведомления</a><a href="#">Безопасность</a><a href="/logout">Выйти</a>
-            </div>
-        </details>
-        {% else %}
-        <a href="/login" class="login-button">Войти</a>
-        {% endif %}
-    </div>
-</header>
+<div class="nav-backdrop" id="mobileBackdrop"></div>
+<aside class="nav-drawer" id="mobileSheet" aria-label="Навигация" aria-hidden="true">
+<div class="drawer-head"><div><span>COLLEGEPORTAL</span><strong>Навигация</strong></div><button class="drawer-close" id="mobileCloseButton" type="button" aria-label="Закрыть">×</button></div>
+<a class="drawer-home" href="/"><span class="nav-icon">⌂</span><span><strong>Главная</strong><small>Обзор портала</small></span></a>
+<div class="nav-section"><button class="nav-section-button" type="button" aria-expanded="false"><span><i>01</i><strong>Учёба</strong></span><b>+</b></button><div class="nav-submenu">
+<a href="/schedule"><span>01</span>Расписание</a><a href="/assignments"><span>02</span>Задания</a><a href="/grades"><span>03</span>Журнал</a><a href="/attendance"><span>04</span>Посещаемость</a><a href="/materials"><span>05</span>Материалы</a>
+</div></div>
+<div class="nav-section"><button class="nav-section-button" type="button" aria-expanded="false"><span><i>02</i><strong>Колледж</strong></span><b>+</b></button><div class="nav-submenu">
+<a href="/announcements"><span>06</span>Объявления</a><a href="/freshman"><span>07</span>Первокурснику</a>
+</div></div>
+<div class="nav-section"><button class="nav-section-button" type="button" aria-expanded="false"><span><i>03</i><strong>Документы</strong></span><b>+</b></button><div class="nav-submenu"><a href="/certificates"><span>08</span>Справки и документы</a></div></div>
+{% if user and user.role == "admin" %}<div class="nav-section admin-nav"><a class="nav-section-direct" href="/admin"><span><i>04</i><strong>Администрирование</strong></span><b>→</b></a></div>{% endif %}
+<div class="drawer-footer">{% if user %}<a href="/logout"><span>↪</span>Выйти из аккаунта</a>{% else %}<a href="/login"><span>→</span>Войти в аккаунт</a>{% endif %}</div>
+</aside>
 
-<div class="mobile-sheet-backdrop" id="mobileBackdrop"></div>
-<section class="mobile-sheet" id="mobileSheet" aria-label="Навигация" aria-hidden="true">
-    <div class="mobile-sheet-head">
-        <div><span>ПОРТАЛ</span><strong>Навигация</strong></div>
-        <button class="mobile-close-button" id="mobileCloseButton" type="button" aria-label="Закрыть меню">×</button>
-    </div>
-
-    <a class="mobile-main-link" href="/">⌂ <span>Главная</span></a>
-
-    <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>01</i><b>Учёба</b></span><em>+</em></button>
-        <div class="mobile-nav-submenu">
-            <a href="/schedule"><i>01</i><span>Расписание</span></a>
-            <a href="/assignments"><i>02</i><span>Задания</span></a>
-            <a href="/grades"><i>03</i><span>Журнал</span></a>
-            <a href="/attendance"><i>04</i><span>Посещаемость</span></a>
-            <a href="/materials"><i>05</i><span>Материалы</span></a>
-        </div>
-    </div>
-
-    <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>02</i><b>Колледж</b></span><em>+</em></button>
-        <div class="mobile-nav-submenu">
-            <a href="/announcements"><i>06</i><span>Объявления</span></a>
-            <a href="/freshman"><i>07</i><span>Первокурснику</span></a>
-        </div>
-    </div>
-
-    <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>03</i><b>Документы</b></span><em>+</em></button>
-        <div class="mobile-nav-submenu">
-            <a href="/certificates"><i>08</i><span>Справки</span></a>
-        </div>
-    </div>
-
-    {% if user %}
-    <a class="mobile-main-link mobile-logout" href="/logout">↪ <span>Выйти</span></a>
-    {% else %}
-    <a class="mobile-main-link mobile-logout" href="/login">→ <span>Войти</span></a>
-    {% endif %}
-</section>
-
-<main class="page-content">
-    <div class="page-heading">
-        <div>
-            <span>ОБРАЗОВАТЕЛЬНЫЙ ПОРТАЛ</span>
-            <h1>{% block page_title %}Главная{% endblock %}</h1>
-        </div>
-    </div>
-    {% block content %}{% endblock %}
+<main class="page-shell">
+<div class="page-heading"><div><span class="eyebrow">COLLEGEPORTAL / {{ user.role if user else "PUBLIC" }}</span><h1>{% block page_title %}Главная{% endblock %}</h1></div>{% block heading_action %}{% endblock %}</div>
+{% block content %}{% endblock %}
 </main>
-
 <script>
-const sheet = document.getElementById('mobileSheet');
-const backdrop = document.getElementById('mobileBackdrop');
-const menuButton = document.getElementById('mobileMenuButton');
-const closeButton = document.getElementById('mobileCloseButton');
-
-function openMobileMenu() {
-    sheet.classList.add('open');
-    backdrop.classList.add('open');
-    sheet.setAttribute('aria-hidden', 'false');
-    menuButton.setAttribute('aria-expanded', 'true');
-    document.body.classList.add('menu-open');
-}
-function closeMobileMenu() {
-    sheet.classList.remove('open');
-    backdrop.classList.remove('open');
-    sheet.setAttribute('aria-hidden', 'true');
-    menuButton.setAttribute('aria-expanded', 'false');
-    document.body.classList.remove('menu-open');
-}
-menuButton.addEventListener('click', openMobileMenu);
-closeButton.addEventListener('click', closeMobileMenu);
-backdrop.addEventListener('click', closeMobileMenu);
-
-document.querySelectorAll('.mobile-nav-toggle').forEach(button => {
-    button.addEventListener('click', () => {
-        const group = button.closest('.mobile-nav-group');
-        const willOpen = !group.classList.contains('open');
-        document.querySelectorAll('.mobile-nav-group').forEach(other => {
-            other.classList.remove('open');
-            const otherButton = other.querySelector('.mobile-nav-toggle');
-            if (otherButton) otherButton.setAttribute('aria-expanded', 'false');
-        });
-        if (willOpen) {
-            group.classList.add('open');
-            button.setAttribute('aria-expanded', 'true');
-        }
-    });
-});
-
-document.querySelectorAll('.mobile-sheet a').forEach(link => link.addEventListener('click', closeMobileMenu));
-document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') closeMobileMenu();
-});
+const sheet=document.getElementById('mobileSheet'),backdrop=document.getElementById('mobileBackdrop'),menuButton=document.getElementById('mobileMenuButton'),closeButton=document.getElementById('mobileCloseButton');
+function openMobileMenu(){sheet.classList.add('open');backdrop.classList.add('open');sheet.setAttribute('aria-hidden','false');menuButton.setAttribute('aria-expanded','true');document.body.classList.add('menu-open')}
+function closeMobileMenu(){sheet.classList.remove('open');backdrop.classList.remove('open');sheet.setAttribute('aria-hidden','true');menuButton.setAttribute('aria-expanded','false');document.body.classList.remove('menu-open')}
+menuButton?.addEventListener('click',openMobileMenu);closeButton?.addEventListener('click',closeMobileMenu);backdrop?.addEventListener('click',closeMobileMenu);
+document.querySelectorAll('.nav-section-button').forEach(button=>button.addEventListener('click',()=>{const section=button.closest('.nav-section'),open=!section.classList.contains('open');document.querySelectorAll('.nav-section').forEach(item=>{item.classList.remove('open');item.querySelector('.nav-section-button')?.setAttribute('aria-expanded','false')});if(open){section.classList.add('open');button.setAttribute('aria-expanded','true')}}));
+document.querySelectorAll('.nav-drawer a').forEach(link=>link.addEventListener('click',closeMobileMenu));document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu()});
 </script>
-</body>
-</html>
+</body></html>
