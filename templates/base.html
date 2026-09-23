@@ -8,116 +8,131 @@
 </head>
 <body>
 <header class="site-header">
-    <a class="brand" href="/"><span class="brand-mark">К</span><span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span></a>
+    <a class="brand" href="/">
+        <span class="brand-mark">К</span>
+        <span class="brand-copy"><strong>Колледж</strong><small>Образовательный портал</small></span>
+    </a>
+
     <nav class="main-nav" aria-label="Основная навигация">
         <a class="main-nav-link" href="/">Главная</a>
         <details class="nav-menu">
             <summary>Учёба <span>⌄</span></summary>
             <div class="nav-dropdown-panel">
-                <a href="/schedule"><b>📅</b><span><strong>Расписание</strong><small>Занятия по дням</small></span></a>
-                <a href="/assignments"><b>✓</b><span><strong>Задания</strong><small>Учебные задания</small></span></a>
-                <a href="/grades"><b>📊</b><span><strong>Журнал</strong><small>Оценки и результаты</small></span></a>
-                <a href="/attendance"><b>◷</b><span><strong>Посещаемость</strong><small>Учёт посещения</small></span></a>
-                <a href="/materials"><b>📚</b><span><strong>Материалы</strong><small>Учебные файлы</small></span></a>
+                <a href="/schedule"><b>01</b><span><strong>Расписание</strong><small>Занятия по дням</small></span></a>
+                <a href="/assignments"><b>02</b><span><strong>Задания</strong><small>Учебные задания</small></span></a>
+                <a href="/grades"><b>03</b><span><strong>Журнал</strong><small>Оценки и результаты</small></span></a>
+                <a href="/attendance"><b>04</b><span><strong>Посещаемость</strong><small>Учёт посещения</small></span></a>
+                <a href="/materials"><b>05</b><span><strong>Материалы</strong><small>Файлы и документы</small></span></a>
             </div>
         </details>
         <details class="nav-menu">
             <summary>Колледж <span>⌄</span></summary>
             <div class="nav-dropdown-panel">
-                <a href="/announcements"><b>📢</b><span><strong>Объявления</strong><small>Новости колледжа</small></span></a>
-                <a href="/freshman"><b>🎓</b><span><strong>Первокурснику</strong><small>Полезная информация</small></span></a>
+                <a href="/announcements"><b>06</b><span><strong>Объявления</strong><small>Новости колледжа</small></span></a>
+                <a href="/freshman"><b>07</b><span><strong>Первокурснику</strong><small>Полезная информация</small></span></a>
             </div>
         </details>
         <details class="nav-menu">
             <summary>Документы <span>⌄</span></summary>
             <div class="nav-dropdown-panel">
-                <a href="/certificates"><b>📄</b><span><strong>Справки</strong><small>Запрос и статус документов</small></span></a>
+                <a href="/certificates"><b>08</b><span><strong>Справки</strong><small>Запрос и статус документов</small></span></a>
             </div>
         </details>
     </nav>
+
     <div class="header-actions">
-        <button class="header-icon" type="button" title="Уведомления">🔔</button>
+        <button class="header-icon" type="button" title="Уведомления" aria-label="Уведомления">●</button>
         {% if user %}
         <details class="profile-menu">
             <summary><span class="avatar">{{ user.full_name[0] | upper }}</span><span class="profile-name">{{ user.full_name }}</span><span>⌄</span></summary>
             <div class="profile-dropdown">
-                <a href="/student">👤 Профиль</a><a href="#">⚙ Настройки</a><a href="#">🔔 Уведомления</a><a href="#">🔐 Безопасность</a><a href="/logout">↪ Выйти</a>
+                <a href="/student">Профиль</a><a href="#">Настройки</a><a href="#">Уведомления</a><a href="#">Безопасность</a><a href="/logout">Выйти</a>
             </div>
         </details>
-        {% else %}<a href="/login" class="login-button">Войти</a>{% endif %}
+        {% else %}
+        <a href="/login" class="login-button">Войти</a>
+        {% endif %}
     </div>
-    <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню">☰</button>
+
+    <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button>
 </header>
 
-<div class="mobile-overlay" id="mobileOverlay"></div>
-<aside class="mobile-panel" id="mobilePanel" aria-label="Мобильная навигация">
-    <div class="mobile-panel-head">
-        <strong>Навигация</strong>
+<div class="mobile-sheet-backdrop" id="mobileBackdrop"></div>
+<section class="mobile-sheet" id="mobileSheet" aria-label="Мобильная навигация" aria-hidden="true">
+    <div class="mobile-sheet-handle"></div>
+    <div class="mobile-sheet-head">
+        <div><span>ПОРТАЛ</span><strong>Навигация</strong></div>
         <button class="mobile-close-button" id="mobileCloseButton" type="button" aria-label="Закрыть меню">×</button>
     </div>
 
-    <a class="mobile-nav-link" href="/">⌂ <span>Главная</span></a>
+    <a class="mobile-main-link" href="/">⌂ <span>Главная</span></a>
 
     <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
-            <span>📚 <b>Учёба</b></span><span class="mobile-nav-chevron">⌄</span>
-        </button>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>01</i><b>Учёба</b></span><em>+</em></button>
         <div class="mobile-nav-submenu">
-            <a href="/schedule">📅 <span>Расписание</span></a>
-            <a href="/assignments">✓ <span>Задания</span></a>
-            <a href="/grades">📊 <span>Журнал</span></a>
-            <a href="/attendance">◷ <span>Посещаемость</span></a>
-            <a href="/materials">📚 <span>Материалы</span></a>
+            <a href="/schedule"><i>01</i><span>Расписание</span></a>
+            <a href="/assignments"><i>02</i><span>Задания</span></a>
+            <a href="/grades"><i>03</i><span>Журнал</span></a>
+            <a href="/attendance"><i>04</i><span>Посещаемость</span></a>
+            <a href="/materials"><i>05</i><span>Материалы</span></a>
         </div>
     </div>
 
     <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
-            <span>🏫 <b>Колледж</b></span><span class="mobile-nav-chevron">⌄</span>
-        </button>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>02</i><b>Колледж</b></span><em>+</em></button>
         <div class="mobile-nav-submenu">
-            <a href="/announcements">📢 <span>Объявления</span></a>
-            <a href="/freshman">🎓 <span>Первокурснику</span></a>
+            <a href="/announcements"><i>06</i><span>Объявления</span></a>
+            <a href="/freshman"><i>07</i><span>Первокурснику</span></a>
         </div>
     </div>
 
     <div class="mobile-nav-group">
-        <button class="mobile-nav-toggle" type="button" aria-expanded="false">
-            <span>📄 <b>Документы</b></span><span class="mobile-nav-chevron">⌄</span>
-        </button>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false"><span><i>03</i><b>Документы</b></span><em>+</em></button>
         <div class="mobile-nav-submenu">
-            <a href="/certificates">📄 <span>Справки</span></a>
+            <a href="/certificates"><i>08</i><span>Справки</span></a>
         </div>
     </div>
 
     {% if user %}
-    <a class="mobile-nav-link mobile-logout" href="/logout">↪ <span>Выйти</span></a>
+    <a class="mobile-main-link mobile-logout" href="/logout">↪ <span>Выйти</span></a>
     {% else %}
-    <a class="mobile-nav-link mobile-logout" href="/login">→ <span>Войти</span></a>
+    <a class="mobile-main-link mobile-logout" href="/login">→ <span>Войти</span></a>
     {% endif %}
-</aside>
+</section>
 
 <main class="page-content">
-    <div class="page-heading"><div><span>ОБРАЗОВАТЕЛЬНЫЙ ПОРТАЛ</span><h1>{% block page_title %}Главная{% endblock %}</h1></div></div>
+    <div class="page-heading">
+        <div>
+            <span>ОБРАЗОВАТЕЛЬНЫЙ ПОРТАЛ</span>
+            <h1>{% block page_title %}Главная{% endblock %}</h1>
+        </div>
+    </div>
     {% block content %}{% endblock %}
 </main>
 
 <script>
-const panel = document.getElementById('mobilePanel');
-const overlay = document.getElementById('mobileOverlay');
-const openMobileMenu = () => {
-    panel.classList.add('open');
-    overlay.classList.add('open');
+const sheet = document.getElementById('mobileSheet');
+const backdrop = document.getElementById('mobileBackdrop');
+const menuButton = document.getElementById('mobileMenuButton');
+const closeButton = document.getElementById('mobileCloseButton');
+
+function openMobileMenu() {
+    sheet.classList.add('open');
+    backdrop.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+    menuButton.setAttribute('aria-expanded', 'true');
     document.body.classList.add('menu-open');
-};
-const closeMobileMenu = () => {
-    panel.classList.remove('open');
-    overlay.classList.remove('open');
+}
+function closeMobileMenu() {
+    sheet.classList.remove('open');
+    backdrop.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+    menuButton.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('menu-open');
-};
-document.getElementById('mobileMenuButton').addEventListener('click', openMobileMenu);
-document.getElementById('mobileCloseButton').addEventListener('click', closeMobileMenu);
-overlay.addEventListener('click', closeMobileMenu);
+}
+menuButton.addEventListener('click', openMobileMenu);
+closeButton.addEventListener('click', closeMobileMenu);
+backdrop.addEventListener('click', closeMobileMenu);
 
 document.querySelectorAll('.main-nav details').forEach(details => {
     details.addEventListener('toggle', () => {
@@ -132,21 +147,22 @@ document.querySelectorAll('.main-nav details').forEach(details => {
 document.querySelectorAll('.mobile-nav-toggle').forEach(button => {
     button.addEventListener('click', () => {
         const group = button.closest('.mobile-nav-group');
-        const isOpen = group.classList.toggle('open');
-        button.setAttribute('aria-expanded', String(isOpen));
-
+        const willOpen = !group.classList.contains('open');
         document.querySelectorAll('.mobile-nav-group').forEach(other => {
-            if (other !== group) {
-                other.classList.remove('open');
-                const otherButton = other.querySelector('.mobile-nav-toggle');
-                if (otherButton) otherButton.setAttribute('aria-expanded', 'false');
-            }
+            other.classList.remove('open');
+            const otherButton = other.querySelector('.mobile-nav-toggle');
+            if (otherButton) otherButton.setAttribute('aria-expanded', 'false');
         });
+        if (willOpen) {
+            group.classList.add('open');
+            button.setAttribute('aria-expanded', 'true');
+        }
     });
 });
 
-document.querySelectorAll('.mobile-panel a').forEach(link => {
-    link.addEventListener('click', closeMobileMenu);
+document.querySelectorAll('.mobile-sheet a').forEach(link => link.addEventListener('click', closeMobileMenu));
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeMobileMenu();
 });
 </script>
 </body>
