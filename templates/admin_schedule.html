@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Управление расписанием — CollegePortal{% endblock %}
+{% block page_title %}Управление расписанием{% endblock %}
+{% block content %}
+<section class="section-toolbar">
+  <div><span class="panel-label">АДМИНИСТРАТОР / РАСПИСАНИЕ</span><h2>Учебные занятия</h2><p>Создавайте занятия из уже настроенных предметов, групп и назначений преподавателей.</p></div>
+  <a class="filter-button" href="/schedule">Открыть расписание →</a>
+</section>
+
+{% if request.query_params.get("created") %}
+<div class="notice success">Занятие добавлено в расписание.</div>
+{% elif request.query_params.get("error") == "assignment" %}
+<div class="notice error">Для этой группы, предмета и преподавателя сначала нужно создать назначение.</div>
+{% elif request.query_params.get("error") == "conflict" %}
+<div class="notice error">У этой группы уже есть занятие, пересекающееся по времени.</div>
+{% elif request.query_params.get("error") == "time" %}
+<div class="notice error">Проверьте день и время занятия.</div>
+{% else %}
+<div class="notice">Сначала настройте группы, предметы и назначения преподавателей — затем добавляйте занятия.</div>
+{% endif %}
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header"><div><span class="panel-label">НОВОЕ ЗАНЯТИЕ</span><h3>Добавить в расписание</h3></div></div>
+    {% if groups and subjects and teachers %}
+    <form class="admin-form" method="post" action="/admin/schedule/create">
+      <label>Группа<select name="group_id" required>{% for group in groups %}<option value="{{ group.id }}">{{ group.name }}</option>{% endfor %}</select></label>
+      <label>Предмет<select name="subject_id" required>{% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.name }}{% if subject.code %} · {{ subject.code }}{% endif %}</option>{% endfor %}</select></label>
+      <label>Преподаватель<select name="teacher_id" required>{% for teacher in teachers %}<option value="{{ teacher.id }}">{{ teacher.full_name }}</option>{% endfor %}</select></label>
+      <label>День<select name="day_of_week" required><option value="0">Понедельник</option><option value="1">Вторник</option><option value="2">Среда</option><option value="3">Четверг</option><option value="4">Пятница</option></select></label>
+      <div class="form-row"><label>Начало<input type="time" name="start_time" value="09:00" required></label><label>Конец<input type="time" name="end_time" value="10:30" required></label></div>
+      <div class="form-row"><label>Кабинет<input name="room" maxlength="50" placeholder="Например, 204"></label><label>Тип<select name="lesson_type"><option>Лекция</option><option>Практика</option><option>Лабораторная</option><option>Занятие</option></select></label></div>
+      <button class="primary-button" type="submit">Добавить занятие</button>
+    </form>
+    {% else %}
+    <div class="empty-state"><div class="empty-mark">!</div><strong>Не хватает учебных данных</strong><p>Нужны активные группы, предметы и преподаватели. После их создания здесь появится форма.</p></div>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-header"><div><span class="panel-label">ТЕКУЩЕЕ РАСПИСАНИЕ</span><h3>{{ entries|length }} занятий</h3></div></div>
+    {% if entries %}
+    <div class="admin-table">
+      {% for entry in entries %}
+      <div class="admin-table-row">
+        <div><strong>{{ entry.start_time }}–{{ entry.end_time }} · {{ entry.subject.name }}</strong><span>{{ ["Пн","Вт","Ср","Чт","Пт"][entry.day_of_week] }} · {{ entry.group.name }} · {{ entry.teacher.full_name }}{% if entry.room %} · {{ entry.room }}{% endif %}</span></div>
+        <form method="post" action="/admin/schedule/{{ entry.id }}/delete"><button class="danger-button" type="submit">Удалить</button></form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-mark">01</div><strong>Расписание пока пустое</strong><p>Добавьте первое занятие через форму слева.</p></div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}
