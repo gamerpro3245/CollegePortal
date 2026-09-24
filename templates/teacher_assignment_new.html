@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Новое задание — CollegePortal{% endblock %}
+{% block page_title %}Новое задание{% endblock %}
+{% block content %}
+<section class="section-toolbar"><div><h2>Новое задание</h2><p>Опубликуйте работу для одной из ваших групп.</p></div><a class="filter-button" href="/assignments">Задания</a></section>
+{% if request.query_params.get("error") %}<div class="notice error">Проверьте название и выбранное назначение.</div>{% endif %}
+<article class="panel schedule-edit-panel"><form class="admin-form" method="post" action="/teacher/assignments/create">
+<label>Название<input name="title" maxlength="180" required placeholder="Например, Практическая работа №1"></label>
+<label>Группа и предмет<select name="teaching_assignment_id" required>{% for item in assignments %}<option value="{{ item.id }}">{{ item.group.name }} · {{ item.subject.name }}</option>{% endfor %}</select></label>
+<label>Описание<textarea name="description" rows="6" maxlength="2000" placeholder="Что нужно сделать"></textarea></label>
+<label>Срок сдачи<input name="due_date" type="date"></label>
+<div class="row-actions"><button class="primary-button" type="submit">Опубликовать</button><a class="filter-button" href="/assignments">Отмена</a></div>
+</form></article>
+{% endblock %}
