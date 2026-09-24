@@ -1,3 +1,12 @@
-{% extends "base.html" %}{% block title %}Задания — CollegePortal{% endblock %}{% block page_title %}Задания{% endblock %}{% block content %}
-<section class="section-toolbar"><div><span class="panel-label">Учёба / 02</span><h2>Задания</h2><p>Учебные работы, сроки и текущий статус.</p></div><div class="toolbar-actions"><button class="filter-button active" type="button">Все</button><button class="filter-button" type="button">Активные</button></div></section>
-<section class="content-grid"><article class="panel"><div class="panel-header"><div><span class="panel-label">Мои работы</span><h3>Список заданий</h3></div><span class="panel-label">0 работ</span></div><div class="table-empty"><div class="empty-mark">✓</div><strong>Заданий пока нет</strong><p>Новые учебные работы появятся здесь, когда преподаватели их опубликуют.</p></div></article><aside class="panel side-panel"><div class="panel-header"><div><span class="panel-label">Статистика</span><h3>Сводка</h3></div></div><div class="stat-list"><div><span>Всего</span><strong>0</strong></div><div><span>В работе</span><strong>0</strong></div><div><span>Просрочено</span><strong>0</strong></div></div></aside></section>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Задания — CollegePortal{% endblock %}
+{% block page_title %}Задания{% endblock %}
+{% block content %}
+<section class="section-toolbar"><div><h2>Задания</h2><p>Учебные работы и сроки.</p></div>{% if user and user.role == "teacher" %}<a class="filter-button" href="/teacher/assignments/new">Новое задание</a>{% endif %}</section>
+{% if request.query_params.get("created") %}<div class="notice success">Задание опубликовано.</div>{% endif %}
+<section class="content-grid">
+<article class="panel"><div class="panel-header"><div><span class="panel-label">Список</span><h3>Учебные работы</h3></div><span class="panel-label">{{ assignments|length }}</span></div>
+{% if assignments %}<div class="assignment-list">{% for item in assignments %}<article class="assignment-card"><div><span class="panel-label">{{ item.subject.name }} · {{ item.group.name }}</span><h3>{{ item.title }}</h3>{% if item.description %}<p>{{ item.description }}</p>{% endif %}</div><div class="assignment-meta">{% if item.due_date %}<span>До {{ item.due_date }}</span>{% else %}<span>Без срока</span>{% endif %}{% if user and user.role != "student" %}<small>{{ item.teacher.full_name }}</small>{% endif %}</div></article>{% endfor %}</div>
+{% else %}<div class="empty-state"><strong>Заданий пока нет</strong><p>Новые работы появятся здесь после публикации.</p></div>{% endif %}</article>
+<aside class="panel side-panel"><div class="panel-header"><div><span class="panel-label">Сводка</span><h3>Всего заданий</h3></div></div><div class="stat-list"><div><span>Количество</span><strong>{{ assignments|length }}</strong></div></div></aside>
+</section>{% endblock %}
