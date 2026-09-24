@@ -219,6 +219,49 @@ async def admin_create_assignment(teacher_id: int = Form(...), subject_id: int =
             db.commit()
     return RedirectResponse(url="/admin/academic", status_code=303)
 
+@app.post("/admin/academic/group/{group_id}/remove")
+async def admin_remove_group(group_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    group = db.get(Group, group_id)
+    if group:
+        group.is_active = False
+        db.query(TeachingAssignment).filter(TeachingAssignment.group_id == group_id).update({TeachingAssignment.is_active: False})
+    db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/subject/{subject_id}/remove")
+async def admin_remove_subject(subject_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    subject = db.get(Subject, subject_id)
+    if subject:
+        subject.is_active = False
+        db.query(TeachingAssignment).filter(TeachingAssignment.subject_id == subject_id).update({TeachingAssignment.is_active: False})
+    db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/teacher/{teacher_id}/remove")
+async def admin_remove_teacher(teacher_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    teacher = db.get(User, teacher_id)
+    if teacher and teacher.role == "teacher":
+        teacher.is_active = False
+        db.query(TeachingAssignment).filter(TeachingAssignment.teacher_id == teacher_id).update({TeachingAssignment.is_active: False})
+    db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/assignment/{assignment_id}/remove")
+async def admin_remove_assignment(assignment_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    assignment = db.get(TeachingAssignment, assignment_id)
+    if assignment:
+        assignment.is_active = False
+    db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
 @app.get("/admin/schedule", response_class=HTMLResponse)
 async def admin_schedule(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
