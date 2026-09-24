@@ -11,8 +11,10 @@
 <div class="notice success">Занятие добавлено в расписание.</div>
 {% elif request.query_params.get("error") == "assignment" %}
 <div class="notice error">Для этой группы, предмета и преподавателя сначала нужно создать назначение.</div>
-{% elif request.query_params.get("error") == "conflict" %}
+{% elif request.query_params.get("error") == "group_conflict" %}
 <div class="notice error">У этой группы уже есть занятие, пересекающееся по времени.</div>
+{% elif request.query_params.get("error") == "teacher_conflict" %}
+<div class="notice error">У этого преподавателя уже есть занятие, пересекающееся по времени.</div>
 {% elif request.query_params.get("error") == "time" %}
 <div class="notice error">Проверьте день и время занятия.</div>
 {% else %}
