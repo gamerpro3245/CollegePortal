@@ -166,6 +166,59 @@ async def admin_create_student(full_name: str = Form(...), username: str = Form(
     db.commit()
     return RedirectResponse(url="/admin/students", status_code=303)
 
+@app.get("/admin/academic", response_class=HTMLResponse)
+async def admin_academic(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
+    subjects = db.scalars(select(Subject).where(Subject.is_active.is_(True)).order_by(Subject.name)).all()
+    teachers = db.scalars(select(User).where(User.role == "teacher", User.is_active.is_(True)).order_by(User.full_name)).all()
+    assignments = db.scalars(select(TeachingAssignment).where(TeachingAssignment.is_active.is_(True)).options(joinedload(TeachingAssignment.teacher), joinedload(TeachingAssignment.subject), joinedload(TeachingAssignment.group)).order_by(TeachingAssignment.id.desc())).all()
+    return templates.TemplateResponse(request=request, name="admin_academic.html", context={"user": user, "groups": groups, "subjects": subjects, "teachers": teachers, "assignments": assignments})
+
+@app.post("/admin/academic/group")
+async def admin_create_group(name: str = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    name = name.strip()
+    if name and not db.scalars(select(Group).where(Group.name == name)).first():
+        db.add(Group(name=name, is_active=True))
+        db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/subject")
+async def admin_create_subject(name: str = Form(...), code: str = Form(default=""), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    name, code = name.strip(), code.strip() or None
+    if name and not db.scalars(select(Subject).where(Subject.name == name)).first():
+        db.add(Subject(name=name, code=code, is_active=True))
+        db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/teacher")
+async def admin_create_teacher(full_name: str = Form(...), username: str = Form(...), password: str = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    username = username.strip()
+    if not db.scalars(select(User).where(User.username == username)).first():
+        db.add(User(full_name=full_name.strip(), username=username, password_hash=password_hash.hash(password), role="teacher", is_active=True))
+        db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
+@app.post("/admin/academic/assignment")
+async def admin_create_assignment(teacher_id: int = Form(...), subject_id: int = Form(...), group_id: int = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    if not require_admin(access_token, db):
+        return RedirectResponse(url="/login", status_code=303)
+    teacher, subject, group = db.get(User, teacher_id), db.get(Subject, subject_id), db.get(Group, group_id)
+    if teacher and teacher.role == "teacher" and subject and group:
+        exists = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == teacher_id, TeachingAssignment.subject_id == subject_id, TeachingAssignment.group_id == group_id, TeachingAssignment.is_active.is_(True))).first()
+        if not exists:
+            db.add(TeachingAssignment(teacher_id=teacher_id, subject_id=subject_id, group_id=group_id, is_active=True))
+            db.commit()
+    return RedirectResponse(url="/admin/academic", status_code=303)
+
 @app.get("/admin/schedule", response_class=HTMLResponse)
 async def admin_schedule(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
