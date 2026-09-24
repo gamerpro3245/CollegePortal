@@ -115,19 +115,19 @@ async def schedule_page(request: Request, access_token: str | None = Cookie(defa
     user = get_current_user(access_token, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
-    query = select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher)).order_by(ScheduleEntry.day_of_week, ScheduleEntry.start_time)
-    if user.role == "student":
-        entries = db.scalars(query.where(ScheduleEntry.group_id == user.group_id)).all() if user.group_id else []
-    elif user.role == "teacher":
-        entries = db.scalars(query.where(ScheduleEntry.teacher_id == user.id)).all()
-    else:
-        entries = db.scalars(query).all()
+    try:
+        selected_course = max(1, min(4, int(request.query_params.get("course", "1"))))
+        selected_day = max(0, min(4, int(request.query_params.get("day", "0"))))
+    except ValueError:
+        selected_course, selected_day = 1, 0
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True), Group.course == selected_course).order_by(Group.name)).all()
+    group_ids = [group.id for group in groups]
+    entries = []
+    if group_ids:
+        entries = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.day_of_week == selected_day, ScheduleEntry.lesson_number.between(1, 6), ScheduleEntry.group_id.in_(group_ids)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher)).order_by(ScheduleEntry.lesson_number)).all()
+    cells = {(entry.lesson_number, entry.group_id): entry for entry in entries}
     days = [(0, "Понедельник"), (1, "Вторник"), (2, "Среда"), (3, "Четверг"), (4, "Пятница")]
-    schedule_by_day = {day_id: [] for day_id, _ in days}
-    for entry in entries:
-        schedule_by_day[entry.day_of_week].append(entry)
-    return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request, days=days, schedule_by_day=schedule_by_day, schedule_entries=entries))
-
+    return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request, groups=groups, cells=cells, days=days, selected_course=selected_course, selected_day=selected_day))
 @app.get("/assignments", response_class=HTMLResponse)
 async def assignments_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = get_current_user(access_token, db)
