@@ -13,7 +13,7 @@
 
   <div class="schedule-course-tabs" role="tablist">
     {% for course in [1,2,3,4] %}
-      <a class="{% if selected_course == course %}active{% endif %}" href="/schedule?course={{ course }}&day={{ selected_day }}">1–{{ course }} курс{% if course == 1 %}{{ "" }}{% endif %}</a>
+      <a class="{% if selected_course == course %}active{% endif %}" href="/schedule?course={{ course }}&day={{ selected_day }}">{{ course }} курс{% if course == 1 %}{{ "" }}{% endif %}</a>
     {% endfor %}
   </div>
 
