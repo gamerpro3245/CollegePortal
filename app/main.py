@@ -208,12 +208,12 @@ async def admin_academic(request: Request, access_token: str | None = Cookie(def
     return templates.TemplateResponse(request=request, name="admin_academic.html", context={"user": user, "groups": groups, "subjects": subjects, "teachers": teachers, "assignments": assignments})
 
 @app.post("/admin/academic/group")
-async def admin_create_group(name: str = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+async def admin_create_group(name: str = Form(...), course: int = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     if not require_admin(access_token, db):
         return RedirectResponse(url="/login", status_code=303)
     name = name.strip()
-    if name and not db.scalars(select(Group).where(Group.name == name)).first():
-        db.add(Group(name=name, is_active=True))
+    if name and course in range(1, 5) and not db.scalars(select(Group).where(Group.name == name)).first():
+        db.add(Group(name=name, course=course, is_active=True))
         db.commit()
     return RedirectResponse(url="/admin/academic", status_code=303)
 
@@ -304,11 +304,11 @@ async def admin_schedule(request: Request, access_token: str | None = Cookie(def
     return templates.TemplateResponse(request=request, name="admin_schedule.html", context={"user": user, "groups": groups, "subjects": subjects, "teachers": teachers, "entries": entries})
 
 @app.post("/admin/schedule/create")
-async def admin_create_schedule(group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+async def admin_create_schedule(group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), lesson_number: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
-    if day_of_week not in range(5) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
+    if day_of_week not in range(5) or lesson_number not in range(1, 7) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
         return RedirectResponse(url="/admin/schedule?error=time", status_code=303)
     group, subject, teacher = db.get(Group, group_id), db.get(Subject, subject_id), db.get(User, teacher_id)
     if not group or not subject or not teacher or teacher.role != "teacher":
@@ -322,7 +322,7 @@ async def admin_create_schedule(group_id: int = Form(...), subject_id: int = For
     teacher_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.teacher_id == teacher_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
     if teacher_conflict:
         return RedirectResponse(url="/admin/schedule?error=teacher_conflict", status_code=303)
-    db.add(ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True))
+    db.add(ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, lesson_number=lesson_number, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True))
     db.commit()
     return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
 
@@ -366,6 +366,7 @@ async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subjec
     entry.teacher_id = teacher_id
     entry.teaching_assignment_id = assignment.id
     entry.day_of_week = day_of_week
+    entry.lesson_number = lesson_number
     entry.start_time = start_time
     entry.end_time = end_time
     entry.room = room.strip() or None
