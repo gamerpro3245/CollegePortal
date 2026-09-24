@@ -24,6 +24,7 @@ class Group(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    course: Mapped[int] = mapped_column(default=1)
     is_active: Mapped[bool] = mapped_column(default=True)
 
     students: Mapped[list["User"]] = relationship(back_populates="group")
@@ -69,6 +70,7 @@ class ScheduleEntry(Base):
         ForeignKey("teaching_assignments.id"), nullable=True
     )
     day_of_week: Mapped[int] = mapped_column(nullable=False, index=True)
+    lesson_number: Mapped[int] = mapped_column(default=1, nullable=False)
     start_time: Mapped[str] = mapped_column(String(5), nullable=False)
     end_time: Mapped[str] = mapped_column(String(5), nullable=False)
     room: Mapped[str | None] = mapped_column(String(50), nullable=True)
