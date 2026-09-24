@@ -8,7 +8,7 @@ import jwt
 
 from app.auth import ALGORITHM, SECRET_KEY, create_access_token, get_user_by_username, verify_password, password_hash
 from app.database import Base, engine, get_db
-from app.models import Group, ScheduleEntry, Subject, TeachingAssignment, User
+from app.models import Assignment, Group, ScheduleEntry, Subject, TeachingAssignment, User
 
 app = FastAPI(title="Портал колледжа")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -82,6 +82,26 @@ async def student_dashboard(request: Request, access_token: str | None = Cookie(
         return RedirectResponse(url="/login", status_code=303)
     return templates.TemplateResponse(request=request, name="student.html", context={"user": user})
 
+@app.get("/teacher/assignments/new", response_class=HTMLResponse)
+async def teacher_assignment_new(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user or user.role != "teacher":
+        return RedirectResponse(url="/login", status_code=303)
+    assignments = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == user.id, TeachingAssignment.is_active.is_(True)).options(joinedload(TeachingAssignment.subject), joinedload(TeachingAssignment.group)).order_by(TeachingAssignment.id)).all()
+    return templates.TemplateResponse(request=request, name="teacher_assignment_new.html", context=template_context(request, assignments=assignments))
+
+@app.post("/teacher/assignments/create")
+async def teacher_assignment_create(title: str = Form(...), description: str = Form(default=""), due_date: str = Form(default=""), teaching_assignment_id: int = Form(...), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user or user.role != "teacher":
+        return RedirectResponse(url="/login", status_code=303)
+    teaching = db.scalars(select(TeachingAssignment).where(TeachingAssignment.id == teaching_assignment_id, TeachingAssignment.teacher_id == user.id, TeachingAssignment.is_active.is_(True))).first()
+    if not teaching or not title.strip():
+        return RedirectResponse(url="/teacher/assignments/new?error=invalid", status_code=303)
+    db.add(Assignment(title=title.strip(), description=description.strip() or None, due_date=due_date.strip() or None, teacher_id=user.id, subject_id=teaching.subject_id, group_id=teaching.group_id, is_active=True))
+    db.commit()
+    return RedirectResponse(url="/assignments?created=1", status_code=303)
+
 @app.get("/teacher", response_class=HTMLResponse)
 async def teacher_dashboard(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = get_current_user(access_token, db)
@@ -109,8 +129,18 @@ async def schedule_page(request: Request, access_token: str | None = Cookie(defa
     return templates.TemplateResponse(request=request, name="schedule.html", context=template_context(request, days=days, schedule_by_day=schedule_by_day, schedule_entries=entries))
 
 @app.get("/assignments", response_class=HTMLResponse)
-async def assignments_page(request: Request):
-    return templates.TemplateResponse(request=request, name="assignments.html", context=template_context(request))
+async def assignments_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    query = select(Assignment).where(Assignment.is_active.is_(True)).options(joinedload(Assignment.subject), joinedload(Assignment.group), joinedload(Assignment.teacher)).order_by(Assignment.id.desc())
+    if user.role == "student":
+        assignments = db.scalars(query.where(Assignment.group_id == user.group_id)).all() if user.group_id else []
+    elif user.role == "teacher":
+        assignments = db.scalars(query.where(Assignment.teacher_id == user.id)).all()
+    else:
+        assignments = db.scalars(query).all()
+    return templates.TemplateResponse(request=request, name="assignments.html", context=template_context(request, assignments=assignments))
 
 @app.get("/grades", response_class=HTMLResponse)
 async def grades_page(request: Request):
