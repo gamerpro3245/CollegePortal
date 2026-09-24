@@ -2,42 +2,6 @@
 {% block title %}Расписание — CollegePortal{% endblock %}
 {% block page_title %}Расписание{% endblock %}
 {% block content %}
-<section class="section-toolbar">
-  <div>
-    <span class="panel-label">Учёба / 01</span>
-    <h2>Расписание</h2>
-    <p>{% if user.role == "student" %}Занятия вашей группы.{% elif user.role == "teacher" %}Ваши занятия по назначенным группам.{% else %}Все занятия портала.{% endif %}</p>
-  </div>
-  {% if user.role == "admin" %}<a class="filter-button active" href="/admin/schedule">Управлять расписанием →</a>{% endif %}
-</section>
+<section class="section-toolbar"><div><h2>Расписание</h2><p>Общее расписание колледжа.</p></div>{% if user.role == "admin" %}<a class="filter-button active" href="/admin/schedule">Управлять расписанием</a>{% endif %}</section><section class="schedule-switch"><div class="schedule-courses">{% for course in [1,2,3,4] %}<a class="{% if selected_course == course %}active{% endif %}" href="/schedule?course={{ course }}&day={{ selected_day }}">Курс {{ course }}</a>{% endfor %}</div></section>
 
-<section class="schedule-list">
-  {% for day_id, day_name in days %}
-  <article class="day-card">
-    <div class="day-title">
-      <strong>{{ day_name }}</strong>
-      <span>{% if schedule_by_day[day_id] %}{{ schedule_by_day[day_id]|length }} занятий{% else %}Свободный день{% endif %}</span>
-    </div>
-    {% if schedule_by_day[day_id] %}
-      <div class="lesson-list">
-      {% for entry in schedule_by_day[day_id] %}
-        <div class="lesson-card">
-          <div class="lesson-time"><strong>{{ entry.start_time }}</strong><span>{{ entry.end_time }}</span></div>
-          <div class="lesson-main">
-            <strong>{{ entry.subject.name }}</strong>
-            <span>{{ entry.lesson_type }}{% if entry.room %} · Кабинет {{ entry.room }}{% endif %}</span>
-          </div>
-          <div class="lesson-side">
-            {% if user.role != "student" %}<span>{{ entry.group.name }}</span>{% endif %}
-            {% if user.role != "teacher" %}<span>{{ entry.teacher.full_name }}</span>{% endif %}
-          </div>
-        </div>
-      {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-row"><span>—</span><div><strong>Занятий нет</strong><small>На этот день ничего не запланировано.</small></div></div>
-    {% endif %}
-  </article>
-  {% endfor %}
-</section>
-{% endblock %}
+<section class="schedule-board-wrap"><table class="schedule-board"><thead><tr><th>Пара</th>{% for group in groups %}<th>{{ group.name }}</th>{% endfor %}</tr></thead><tbody>{% for lesson in range(1,7) %}<tr><th>{{ lesson }}</th>{% for group in groups %}<td>{% set entry = cells.get((lesson, group.id)) %}{% if entry %}<div class="schedule-cell"><strong>{{ entry.subject.name }}</strong><span>{{ entry.room or "—" }}</span><small>{{ entry.teacher.full_name }}</small></div>{% else %}<span class="schedule-empty">—</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody></table></section><nav class="schedule-days">{% for id,name in days %}<a class="{% if selected_day == id %}active{% endif %}" href="/schedule?course={{ selected_course }}&day={{ id }}">{{ name }}</a>{% endfor %}</nav>{% endblock %}
