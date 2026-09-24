@@ -288,7 +288,10 @@ async def admin_create_schedule(group_id: int = Form(...), subject_id: int = For
         return RedirectResponse(url="/admin/schedule?error=assignment", status_code=303)
     conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.group_id == group_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
     if conflict:
-        return RedirectResponse(url="/admin/schedule?error=conflict", status_code=303)
+        return RedirectResponse(url="/admin/schedule?error=group_conflict", status_code=303)
+    teacher_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.teacher_id == teacher_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
+    if teacher_conflict:
+        return RedirectResponse(url="/admin/schedule?error=teacher_conflict", status_code=303)
     db.add(ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True))
     db.commit()
     return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
