@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import Cookie, Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -133,7 +135,8 @@ async def assignments_page(request: Request, access_token: str | None = Cookie(d
     user = get_current_user(access_token, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
-    query = select(Assignment).where(Assignment.is_active.is_(True)).options(joinedload(Assignment.subject), joinedload(Assignment.group), joinedload(Assignment.teacher)).order_by(Assignment.id.desc())
+    today = date.today().isoformat()
+    query = select(Assignment).where(Assignment.is_active.is_(True), (Assignment.due_date.is_(None)) | (Assignment.due_date >= today)).options(joinedload(Assignment.subject), joinedload(Assignment.group), joinedload(Assignment.teacher)).order_by(Assignment.id.desc())
     if user.role == "student":
         assignments = db.scalars(query.where(Assignment.group_id == user.group_id)).all() if user.group_id else []
     elif user.role == "teacher":
@@ -141,6 +144,17 @@ async def assignments_page(request: Request, access_token: str | None = Cookie(d
     else:
         assignments = db.scalars(query).all()
     return templates.TemplateResponse(request=request, name="assignments.html", context=template_context(request, assignments=assignments))
+
+@app.post("/teacher/assignments/{assignment_id}/delete")
+async def teacher_delete_assignment(assignment_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user or user.role != "teacher":
+        return RedirectResponse(url="/login", status_code=303)
+    assignment = db.scalars(select(Assignment).where(Assignment.id == assignment_id, Assignment.teacher_id == user.id, Assignment.is_active.is_(True))).first()
+    if assignment:
+        assignment.is_active = False
+        db.commit()
+    return RedirectResponse(url="/assignments?deleted=1", status_code=303)
 
 @app.get("/grades", response_class=HTMLResponse)
 async def grades_page(request: Request):
