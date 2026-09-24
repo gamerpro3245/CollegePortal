@@ -296,6 +296,53 @@ async def admin_create_schedule(group_id: int = Form(...), subject_id: int = For
     db.commit()
     return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
 
+@app.get("/admin/schedule/{entry_id}/edit", response_class=HTMLResponse)
+async def admin_edit_schedule(request: Request, entry_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    entry = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id == entry_id, ScheduleEntry.is_active.is_(True)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher))).first()
+    if not entry:
+        return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
+    subjects = db.scalars(select(Subject).where(Subject.is_active.is_(True)).order_by(Subject.name)).all()
+    teachers = db.scalars(select(User).where(User.role == "teacher", User.is_active.is_(True)).order_by(User.full_name)).all()
+    return templates.TemplateResponse(request=request, name="admin_schedule_edit.html", context={"user": user, "entry": entry, "groups": groups, "subjects": subjects, "teachers": teachers})
+
+@app.post("/admin/schedule/{entry_id}/edit")
+async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    entry = db.get(ScheduleEntry, entry_id)
+    if not entry or not entry.is_active:
+        return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
+    if day_of_week not in range(5) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
+        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=time", status_code=303)
+    group, subject, teacher = db.get(Group, group_id), db.get(Subject, subject_id), db.get(User, teacher_id)
+    if not group or not group.is_active or not subject or not subject.is_active or not teacher or teacher.role != "teacher" or not teacher.is_active:
+        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=not_found", status_code=303)
+    assignment = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == teacher_id, TeachingAssignment.subject_id == subject_id, TeachingAssignment.group_id == group_id, TeachingAssignment.is_active.is_(True))).first()
+    if not assignment:
+        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=assignment", status_code=303)
+    group_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id != entry_id, ScheduleEntry.is_active.is_(True), ScheduleEntry.group_id == group_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
+    if group_conflict:
+        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=group_conflict", status_code=303)
+    teacher_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id != entry_id, ScheduleEntry.is_active.is_(True), ScheduleEntry.teacher_id == teacher_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
+    if teacher_conflict:
+        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=teacher_conflict", status_code=303)
+    entry.group_id = group_id
+    entry.subject_id = subject_id
+    entry.teacher_id = teacher_id
+    entry.teaching_assignment_id = assignment.id
+    entry.day_of_week = day_of_week
+    entry.start_time = start_time
+    entry.end_time = end_time
+    entry.room = room.strip() or None
+    entry.lesson_type = lesson_type.strip() or "Занятие"
+    db.commit()
+    return RedirectResponse(url="/admin/schedule?updated=1", status_code=303)
+
 @app.post("/admin/schedule/{entry_id}/delete")
 async def admin_delete_schedule(entry_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
