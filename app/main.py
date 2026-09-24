@@ -1,5 +1,5 @@
 from fastapi import Cookie, Depends, FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
@@ -52,6 +52,14 @@ def require_admin(access_token: str | None, db: Session):
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     return templates.TemplateResponse(request=request, name="index.html", context={"user": get_current_user(access_token, db)})
+
+@app.head("/")
+async def home_health():
+    return Response(status_code=200)
+
+@app.get("/healthz", response_class=HTMLResponse)
+async def healthz():
+    return "ok"
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
