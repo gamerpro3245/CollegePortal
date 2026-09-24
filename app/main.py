@@ -340,14 +340,14 @@ async def admin_edit_schedule(request: Request, entry_id: int, access_token: str
     return templates.TemplateResponse(request=request, name="admin_schedule_edit.html", context={"user": user, "entry": entry, "groups": groups, "subjects": subjects, "teachers": teachers})
 
 @app.post("/admin/schedule/{entry_id}/edit")
-async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), lesson_number: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = require_admin(access_token, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
     entry = db.get(ScheduleEntry, entry_id)
     if not entry or not entry.is_active:
         return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
-    if day_of_week not in range(5) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
+    if day_of_week not in range(5) or lesson_number not in range(1, 7) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
         return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=time", status_code=303)
     group, subject, teacher = db.get(Group, group_id), db.get(Subject, subject_id), db.get(User, teacher_id)
     if not group or not group.is_active or not subject or not subject.is_active or not teacher or teacher.role != "teacher" or not teacher.is_active:
