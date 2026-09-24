@@ -9,6 +9,8 @@
 
 {% if request.query_params.get("created") %}
 <div class="notice success">Занятие добавлено в расписание.</div>
+{% elif request.query_params.get("updated") %}
+<div class="notice success">Занятие обновлено.</div>
 {% elif request.query_params.get("error") == "assignment" %}
 <div class="notice error">Для этой группы, предмета и преподавателя сначала нужно создать назначение.</div>
 {% elif request.query_params.get("error") == "group_conflict" %}
@@ -46,7 +48,7 @@
       {% for entry in entries %}
       <div class="admin-table-row">
         <div><strong>{{ entry.start_time }}–{{ entry.end_time }} · {{ entry.subject.name }}</strong><span>{{ ["Пн","Вт","Ср","Чт","Пт"][entry.day_of_week] }} · {{ entry.group.name }} · {{ entry.teacher.full_name }}{% if entry.room %} · {{ entry.room }}{% endif %}</span></div>
-        <form method="post" action="/admin/schedule/{{ entry.id }}/delete"><button class="danger-button" type="submit">Удалить</button></form>
+        <div class="row-actions"><a class="filter-button" href="/admin/schedule/{{ entry.id }}/edit">Изменить</a><form method="post" action="/admin/schedule/{{ entry.id }}/delete"><button class="danger-button" type="submit">Удалить</button></form></div>
       </div>
       {% endfor %}
     </div>
