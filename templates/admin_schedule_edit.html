@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Изменить занятие — CollegePortal{% endblock %}
+{% block page_title %}Изменить занятие{% endblock %}
+{% block content %}
+<section class="section-toolbar"><div><h2>Изменение занятия</h2><p>{{ entry.subject.name }} · {{ entry.group.name }} · {{ entry.start_time }}–{{ entry.end_time }}</p></div><a class="filter-button" href="/admin/schedule">Назад</a></section>
+{% if request.query_params.get("error") == "assignment" %}<div class="notice error">Для выбранной группы, предмета и преподавателя нет активного назначения.</div>
+{% elif request.query_params.get("error") == "group_conflict" %}<div class="notice error">У этой группы уже есть занятие в это время.</div>
+{% elif request.query_params.get("error") == "teacher_conflict" %}<div class="notice error">У этого преподавателя уже есть занятие в это время.</div>
+{% elif request.query_params.get("error") == "time" %}<div class="notice error">Проверьте день и время занятия.</div>{% endif %}
+<article class="panel schedule-edit-panel">
+<form class="admin-form" method="post" action="/admin/schedule/{{ entry.id }}/edit">
+<label>Группа<select name="group_id" required>{% for group in groups %}<option value="{{ group.id }}" {% if group.id == entry.group_id %}selected{% endif %}>{{ group.name }}</option>{% endfor %}</select></label>
+<label>Предмет<select name="subject_id" required>{% for subject in subjects %}<option value="{{ subject.id }}" {% if subject.id == entry.subject_id %}selected{% endif %}>{{ subject.name }}{% if subject.code %} · {{ subject.code }}{% endif %}</option>{% endfor %}</select></label>
+<label>Преподаватель<select name="teacher_id" required>{% for teacher in teachers %}<option value="{{ teacher.id }}" {% if teacher.id == entry.teacher_id %}selected{% endif %}>{{ teacher.full_name }}</option>{% endfor %}</select></label>
+<label>День<select name="day_of_week" required>{% for id,name in [(0,"Понедельник"),(1,"Вторник"),(2,"Среда"),(3,"Четверг"),(4,"Пятница")] %}<option value="{{ id }}" {% if id == entry.day_of_week %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
+<div class="form-row"><label>Начало<input type="time" name="start_time" value="{{ entry.start_time }}" required></label><label>Конец<input type="time" name="end_time" value="{{ entry.end_time }}" required></label></div>
+<div class="form-row"><label>Кабинет<input name="room" maxlength="50" value="{{ entry.room or '' }}"></label><label>Тип<select name="lesson_type">{% for item in ["Лекция","Практика","Лабораторная","Занятие"] %}<option {% if item == entry.lesson_type %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label></div>
+<div class="row-actions"><button class="primary-button" type="submit">Сохранить</button><a class="filter-button" href="/admin/schedule">Отмена</a></div>
+</form>
+</article>
+{% endblock %}
