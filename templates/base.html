@@ -11,7 +11,7 @@
 <header class="topbar">
 <div class="topbar-left">
 <button class="menu-button" id="mobileMenuButton" type="button" aria-label="Открыть навигацию" aria-expanded="false"><span></span><span></span><span></span></button>
-<a class="brand" href="/"><span class="brand-mark">CP</span><span class="brand-text"><strong>CollegePortal</strong><small>Образовательная система</small></span></a>
+<a class="brand" href="/"><span class="brand-mark">CP</span><span class="brand-text"><strong>CollegePortal</strong></span></a>
 </div>
 <div class="topbar-right">
 {% if user %}
@@ -26,8 +26,8 @@
 
 <div class="nav-backdrop" id="mobileBackdrop"></div>
 <aside class="nav-drawer" id="mobileSheet" aria-label="Навигация" aria-hidden="true">
-<div class="drawer-head"><div><span>COLLEGEPORTAL</span><strong>Навигация</strong></div><button class="drawer-close" id="mobileCloseButton" type="button" aria-label="Закрыть">×</button></div>
-<a class="drawer-home" href="/"><span class="nav-icon">⌂</span><span><strong>Главная</strong><small>Обзор портала</small></span></a>
+<div class="drawer-head"><div><strong>Навигация</strong></div><button class="drawer-close" id="mobileCloseButton" type="button" aria-label="Закрыть">×</button></div>
+<a class="drawer-home" href="/"><span class="nav-icon" aria-hidden="true"></span><span><strong>Главная</strong><small>Обзор портала</small></span></a>
 <div class="nav-section"><button class="nav-section-button" type="button" aria-expanded="false"><span><i>01</i><strong>Учёба</strong></span><b>+</b></button><div class="nav-submenu">
 <a href="/schedule"><span>01</span>Расписание</a><a href="/assignments"><span>02</span>Задания</a><a href="/grades"><span>03</span>Журнал</a><a href="/attendance"><span>04</span>Посещаемость</a><a href="/materials"><span>05</span>Материалы</a>
 </div></div>
@@ -36,11 +36,11 @@
 </div></div>
 <div class="nav-section"><button class="nav-section-button" type="button" aria-expanded="false"><span><i>03</i><strong>Документы</strong></span><b>+</b></button><div class="nav-submenu"><a href="/certificates"><span>08</span>Справки и документы</a></div></div>
 {% if user and user.role == "admin" %}<div class="nav-section admin-nav"><a class="nav-section-direct" href="/admin"><span><i>04</i><strong>Администрирование</strong></span><b>→</b></a></div>{% endif %}
-<div class="drawer-footer">{% if user %}<a href="/logout"><span>↪</span>Выйти из аккаунта</a>{% else %}<a href="/login"><span>→</span>Войти в аккаунт</a>{% endif %}</div>
+<div class="drawer-footer">{% if user %}<a href="/logout">Выйти из аккаунта</a>{% else %}<a href="/login">Войти в аккаунт</a>{% endif %}</div>
 </aside>
 
 <main class="page-shell">
-<div class="page-heading"><div><span class="eyebrow">COLLEGEPORTAL / {{ user.role if user else "PUBLIC" }}</span><h1>{% block page_title %}Главная{% endblock %}</h1></div>{% block heading_action %}{% endblock %}</div>
+<div class="page-heading"><div><h1>{% block page_title %}Главная{% endblock %}</h1></div>{% block heading_action %}{% endblock %}</div>
 {% block content %}{% endblock %}
 </main>
 <script>
