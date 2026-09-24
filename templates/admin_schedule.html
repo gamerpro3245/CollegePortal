@@ -31,7 +31,7 @@
       <label>Группа<select name="group_id" required>{% for group in groups %}<option value="{{ group.id }}">{{ group.name }}</option>{% endfor %}</select></label>
       <label>Предмет<select name="subject_id" required>{% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.name }}{% if subject.code %} · {{ subject.code }}{% endif %}</option>{% endfor %}</select></label>
       <label>Преподаватель<select name="teacher_id" required>{% for teacher in teachers %}<option value="{{ teacher.id }}">{{ teacher.full_name }}</option>{% endfor %}</select></label>
-      <label>День<select name="day_of_week" required><option value="0">Понедельник</option><option value="1">Вторник</option><option value="2">Среда</option><option value="3">Четверг</option><option value="4">Пятница</option></select></label>
+      <label>Пара<select name="lesson_number">{% for n in range(1,7) %}<option value="{{ n }}">{{ n }} пара</option>{% endfor %}</select></label><label>День<select name="day_of_week" required><option value="0">Понедельник</option><option value="1">Вторник</option><option value="2">Среда</option><option value="3">Четверг</option><option value="4">Пятница</option></select></label>
       <div class="form-row"><label>Начало<input type="time" name="start_time" value="09:00" required></label><label>Конец<input type="time" name="end_time" value="10:30" required></label></div>
       <div class="form-row"><label>Кабинет<input name="room" maxlength="50" placeholder="Например, 204"></label><label>Тип<select name="lesson_type"><option>Лекция</option><option>Практика</option><option>Лабораторная</option><option>Занятие</option></select></label></div>
       <button class="primary-button" type="submit">Добавить занятие</button>
