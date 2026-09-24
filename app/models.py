@@ -81,3 +81,20 @@ class ScheduleEntry(Base):
     teaching_assignment: Mapped["TeachingAssignment | None"] = relationship(
         back_populates="schedule_entries"
     )
+
+
+class Assignment(Base):
+    __tablename__ = "assignments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(180), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    due_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False, index=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False, index=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+
+    teacher: Mapped["User"] = relationship()
+    subject: Mapped["Subject"] = relationship()
+    group: Mapped["Group"] = relationship()
