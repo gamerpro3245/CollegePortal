@@ -2,24 +2,6 @@
 {% block title %}Администрирование — CollegePortal{% endblock %}
 {% block page_title %}Администрирование{% endblock %}
 {% block content %}
-<style>
-  .admin-page-fix{min-width:0;overflow:hidden}
-  .admin-page-fix .panel{min-width:0}
-  .admin-page-fix .backup-panel{display:grid;gap:12px;min-width:0;overflow:hidden}
-  .admin-page-fix .backup-copy{min-width:0}
-  .admin-page-fix .backup-copy strong,.admin-page-fix .backup-copy span{overflow-wrap:anywhere;word-break:break-word}
-  .admin-page-fix .backup-actions,.admin-page-fix .backup-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
-  .admin-page-fix .admin-action{min-width:0;overflow-wrap:anywhere}
-  .admin-page-fix .admin-action span{overflow-wrap:anywhere}
-  .admin-page-fix .file-button{max-width:100%;white-space:normal;text-align:center}
-  @media(max-width:680px){
-    .admin-page-fix .backup-actions,.admin-page-fix .backup-form{display:grid;grid-template-columns:minmax(0,1fr);width:100%}
-    .admin-page-fix .backup-actions>* , .admin-page-fix .backup-form>*{width:100%;min-width:0}
-    .admin-page-fix .admin-actions{grid-template-columns:minmax(0,1fr)}
-    .admin-page-fix .admin-action{padding:13px}
-    .admin-page-fix .primary-button,.admin-page-fix .file-button{justify-content:center;text-align:center}
-  }
-</style>
 <div class="admin-page-fix">
 {% if request.query_params.get("imported") %}<div class="notice success">Резервная копия восстановлена.</div>{% endif %}
 {% if request.query_params.get("import_error") %}<div class="notice error">Не удалось восстановить копию. Проверь JSON и убедись, что база пустая.</div>{% endif %}
@@ -30,13 +12,11 @@
 </section>
 <section class="panel">
   <div class="panel-header"><div><span class="panel-label">Инструменты</span><h3>Управление</h3></div></div>
-  <div class="backup-panel postgres-notice">
-    <div class="backup-copy"><strong>PostgreSQL Free</strong><span>Бесплатная база Render имеет ограниченный срок. Сохраняй резервную копию заранее.</span></div>
-  </div>
+  <div class="admin-note postgres-notice"><strong>PostgreSQL Free</strong><span>Бесплатная база Render имеет ограниченный срок. Сохраняй резервную копию заранее.</span></div>
   <div class="backup-panel">
-    <div class="backup-copy"><strong>Резервная копия</strong><span>Скачай данные портала или восстанови их в пустой базе.</span></div>
+    <div class="backup-copy"><strong>Резервная копия</strong><span>Сохрани данные портала или восстанови их в пустой базе.</span></div>
     <div class="backup-actions">
-      <a class="admin-action compact-action" href="/admin/export">Скачать JSON</a>
+      <a class="backup-button" href="/admin/export">Скачать JSON</a>
       <form action="/admin/import" method="post" enctype="multipart/form-data" class="backup-form">
         <label class="file-button">Выбрать JSON<input type="file" name="backup" accept=".json,application/json" required></label>
         <button class="primary-button" type="submit">Восстановить</button>
