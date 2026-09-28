@@ -227,12 +227,10 @@ async def admin_import(
         raw = await backup.read()
         payload = json.loads(raw.decode("utf-8"))
         required = {"version", "groups", "subjects", "users", "teaching_assignments", "schedule_entries", "assignments"}
-        if not required.issubset(payload):
+        if not required.issubset(payload) or payload["version"] != 1:
             return RedirectResponse(url="/admin?import_error=structure", status_code=303)
-        if payload["version"] != 1:
-            return RedirectResponse(url="/admin?import_error=version", status_code=303)
 
-        # Safety: import only into an empty database. Existing data is never overwritten.
+        # Restore is intentionally limited to an empty database.
         if any(db.scalar(select(model.id).limit(1)) is not None for model in (User, Group, Subject, TeachingAssignment, ScheduleEntry, Assignment)):
             return RedirectResponse(url="/admin?import_error=not_empty", status_code=303)
 
@@ -243,8 +241,6 @@ async def admin_import(
         db.flush()
 
         for item in payload["users"]:
-            # Password hashes are intentionally not exported, so imported accounts
-            # receive a disabled placeholder and must be reset by an administrator.
             db.add(User(id=item["id"], username=item["username"], password_hash="!IMPORT_PASSWORD_RESET!", full_name=item["full_name"], role=item["role"], group_id=item.get("group_id"), is_active=False))
         db.flush()
 
@@ -253,11 +249,17 @@ async def admin_import(
         db.flush()
 
         for item in payload["schedule_entries"]:
-            db.add(ScheduleEntry(id=item["id"], group_id=item["group_id"], subject_id=item["subject_id"], teacher_id=item["teacher_id"], teaching_assignment_id=item.get("teaching_assignment_id"), day_of_week=item["day_of_week"], lesson_number=item.get("lesson_number", 1), start_time=item["start_time"], end_time=item["end_time"], room=item.get("room"), lesson_type=item.get("lesson_type", "Занятие"), is_active=item.get("is_active", True)))
+            db.add(ScheduleEntry(id=item["id"], group_id=item["group_id"], subject_id=item["subject_id"], teacher_id=item["teacher_id"], teaching_assignment_id=item.get("teaching_assignment_id"), day_of_week=item["day_of_week"], lesson_number=item.get("lesson_number", 1), start_time=item.get("start_time", ""), end_time=item.get("end_time", ""), room=item.get("room"), lesson_type=item.get("lesson_type", "Занятие"), is_active=item.get("is_active", True)))
         for item in payload["assignments"]:
             db.add(Assignment(id=item["id"], title=item["title"], description=item.get("description"), due_date=item.get("due_date"), teacher_id=item["teacher_id"], subject_id=item["subject_id"], group_id=item["group_id"], is_active=item.get("is_active", True)))
         db.commit()
         return RedirectResponse(url="/admin?imported=1", status_code=303)
+    except UnicodeDecodeError:
+        db.rollback()
+        return RedirectResponse(url="/admin?import_error=encoding", status_code=303)
+    except json.JSONDecodeError:
+        db.rollback()
+        return RedirectResponse(url="/admin?import_error=json", status_code=303)
     except Exception:
         db.rollback()
         return RedirectResponse(url="/admin?import_error=invalid", status_code=303)
