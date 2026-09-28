@@ -4,7 +4,11 @@
 {% block content %}
 <div class="admin-page-fix">
 {% if request.query_params.get("imported") %}<div class="notice success">Резервная копия восстановлена.</div>{% endif %}
-{% if request.query_params.get("import_error") %}<div class="notice error">Не удалось восстановить копию. Проверь JSON и убедись, что база пустая.</div>{% endif %}
+{% if request.query_params.get("import_error") == "not_empty" %}<div class="notice error">Восстановление доступно только в пустую базу.</div>{% endif %}
+{% if request.query_params.get("import_error") == "json" %}<div class="notice error">Файл не является корректным JSON.</div>{% endif %}
+{% if request.query_params.get("import_error") == "structure" %}<div class="notice error">Это не резервная копия CollegePortal.</div>{% endif %}
+{% if request.query_params.get("import_error") == "format" %}<div class="notice error">Выбери файл резервной копии.</div>{% endif %}
+{% if request.query_params.get("import_error") == "invalid" %}<div class="notice error">Не удалось восстановить данные. Проверь структуру резервной копии.</div>{% endif %}
 <section class="admin-grid">
   <div class="admin-stat"><span>01 / СТУДЕНТЫ</span><strong>{{ student_count }}</strong><small>Активные аккаунты</small></div>
   <div class="admin-stat"><span>02 / ГРУППЫ</span><strong>{{ group_count }}</strong><small>Учебные группы</small></div>
@@ -15,7 +19,7 @@
   <div class="admin-actions backup-actions">
     <a class="admin-action" href="/admin/export"><strong>Скачать</strong><span>Резервная копия</span><b>→</b></a>
     <form action="/admin/import" method="post" enctype="multipart/form-data" class="backup-form">
-      <label class="admin-action backup-upload"><strong>Загрузить</strong><span>Выбрать копию</span><b>→</b><input type="file" name="backup" accept=".json,application/json" required></label>
+      <label class="admin-action backup-upload"><strong>Загрузить</strong><span>Выбрать файл</span><b>→</b><input type="file" name="backup" accept=".json,application/json" required></label>
     </form>
   </div>
   <div class="admin-actions">
