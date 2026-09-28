@@ -109,3 +109,10 @@
  .backup-form{grid-template-columns:1fr}
  .backup-button,.file-button,.primary-button{min-height:42px}
 }
+
+/* Compact admin backup actions */
+.admin-page-fix .backup-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;margin:0}
+.admin-page-fix .backup-form{display:block;min-width:0}
+.admin-page-fix .backup-upload{position:relative;cursor:pointer}
+.admin-page-fix .backup-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media(max-width:680px){.admin-page-fix .backup-actions{grid-template-columns:1fr}.admin-page-fix .backup-form{width:100%}}
