@@ -52,12 +52,12 @@ document.querySelectorAll('.nav-section-button').forEach(button=>button.addEvent
 document.querySelectorAll('.nav-drawer a').forEach(link=>link.addEventListener('click',closeMobileMenu));document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu()});
 const themeButton=document.getElementById('themeButton');
 const savedTheme=localStorage.getItem('collegeportal-theme');
-if(savedTheme==='dark') document.documentElement.classList.add('dark');
+if(savedTheme==='dark'){document.documentElement.classList.add('dark');themeButton?.querySelector('.theme-icon')?.replaceChildren('☀️');themeButton?.setAttribute('title','Светлая тема');}
 themeButton?.addEventListener('click',()=>{const dark=document.documentElement.classList.toggle('dark');localStorage.setItem('collegeportal-theme',dark?'dark':'light');themeButton.querySelector('.theme-icon').textContent=dark?'☀️':'🌙';themeButton.setAttribute('title',dark?'Светлая тема':'Тёмная тема');});
 const notificationButton=document.getElementById('notificationButton');
 const notificationDot=document.querySelector('.notification-dot');
 const hasNotifications=localStorage.getItem('collegeportal-has-notifications')==='1';
 if(notificationDot) notificationDot.hidden=!hasNotifications;
-notificationButton?.addEventListener('click',()=>{notificationDot?.setAttribute('hidden','');window.location.href='/announcements';});
+notificationButton?.addEventListener('click',()=>{notificationDot?.setAttribute('hidden','');window.location.href='/notifications';});
 </script>
 </body></html>
