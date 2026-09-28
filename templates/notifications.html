@@ -3,10 +3,7 @@
 {% block page_title %}Уведомления{% endblock %}
 {% block content %}
 <section class="notifications-page">
-  <div class="notifications-intro">
-    <h2>Уведомления</h2>
-    <p>Актуальные задания и события портала.</p>
-  </div>
+  
   {% if notifications %}
   <div class="notification-list">
     {% for item in notifications %}
