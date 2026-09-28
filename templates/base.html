@@ -15,7 +15,7 @@
 </div>
 <div class="topbar-right">
 {% if user %}
-<a class="notification-button" href="/announcements" aria-label="Объявления"><span></span></a>
+<button class="top-icon-button notification-button" id="notificationButton" type="button" aria-label="Уведомления" title="Уведомления"><span class="bell-icon" aria-hidden="true"></span><i class="notification-dot" hidden></i></button><button class="top-icon-button theme-button" id="themeButton" type="button" aria-label="Сменить тему" title="Тёмная тема"><span class="theme-icon" aria-hidden="true">◐</span></button>
 <details class="account-menu"><summary><span class="account-avatar">{{ user.full_name[0] | upper }}</span><span class="account-copy"><strong>{{ user.full_name }}</strong><small>{{ user.role }}</small></span><b>⌄</b></summary>
 <div class="account-dropdown">
 {% if user.role == "student" %}<a href="/student">Личный кабинет</a>{% elif user.role == "teacher" %}<a href="/teacher">Рабочий кабинет</a>{% else %}<a href="/admin">Админ-панель</a>{% endif %}
@@ -50,5 +50,14 @@ function closeMobileMenu(){sheet.classList.remove('open');backdrop.classList.rem
 menuButton?.addEventListener('click',openMobileMenu);closeButton?.addEventListener('click',closeMobileMenu);backdrop?.addEventListener('click',closeMobileMenu);
 document.querySelectorAll('.nav-section-button').forEach(button=>button.addEventListener('click',()=>{const section=button.closest('.nav-section'),open=!section.classList.contains('open');document.querySelectorAll('.nav-section').forEach(item=>{item.classList.remove('open');item.querySelector('.nav-section-button')?.setAttribute('aria-expanded','false')});if(open){section.classList.add('open');button.setAttribute('aria-expanded','true')}}));
 document.querySelectorAll('.nav-drawer a').forEach(link=>link.addEventListener('click',closeMobileMenu));document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu()});
+const themeButton=document.getElementById('themeButton');
+const savedTheme=localStorage.getItem('collegeportal-theme');
+if(savedTheme==='dark') document.documentElement.classList.add('dark');
+themeButton?.addEventListener('click',()=>{const dark=document.documentElement.classList.toggle('dark');localStorage.setItem('collegeportal-theme',dark?'dark':'light');themeButton.setAttribute('title',dark?'Светлая тема':'Тёмная тема');});
+const notificationButton=document.getElementById('notificationButton');
+const notificationDot=document.querySelector('.notification-dot');
+const hasNotifications=localStorage.getItem('collegeportal-has-notifications')==='1';
+if(notificationDot) notificationDot.hidden=!hasNotifications;
+notificationButton?.addEventListener('click',()=>{notificationDot?.setAttribute('hidden','');window.location.href='/announcements';});
 </script>
 </body></html>
