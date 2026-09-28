@@ -230,14 +230,15 @@ async def admin_import(
         if not required.issubset(payload) or payload["version"] != 1:
             return RedirectResponse(url="/admin?import_error=structure", status_code=303)
 
-        # Restore is intentionally limited to an empty database.
-        has_non_admin_users = db.scalar(select(User.id).where(User.role != "admin").limit(1)) is not None
-        has_portal_data = has_non_admin_users or any(
-            db.scalar(select(model.id).limit(1)) is not None
-            for model in (Group, Subject, TeachingAssignment, ScheduleEntry, Assignment)
-        )
-        if has_portal_data:
-            return RedirectResponse(url="/admin?import_error=not_empty", status_code=303)
+        # Keep the currently logged-in administrator, but replace the portal data.
+        # This also removes soft-deleted rows left behind by the normal admin UI.
+        db.query(Assignment).delete(synchronize_session=False)
+        db.query(ScheduleEntry).delete(synchronize_session=False)
+        db.query(TeachingAssignment).delete(synchronize_session=False)
+        db.query(User).filter(User.role != "admin").delete(synchronize_session=False)
+        db.query(Subject).delete(synchronize_session=False)
+        db.query(Group).delete(synchronize_session=False)
+        db.flush()
 
         for item in payload["groups"]:
             db.add(Group(id=item["id"], name=item["name"], course=item.get("course", 1), is_active=item.get("is_active", True)))
@@ -248,17 +249,55 @@ async def admin_import(
         for item in payload["users"]:
             if item.get("role") == "admin":
                 continue
-            db.add(User(id=item["id"], username=item["username"], password_hash="!IMPORT_PASSWORD_RESET!", full_name=item["full_name"], role=item["role"], group_id=item.get("group_id"), is_active=False))
+            db.add(User(
+                id=item["id"],
+                username=item["username"],
+                password_hash="!IMPORT_PASSWORD_RESET!",
+                full_name=item["full_name"],
+                role=item["role"],
+                group_id=item.get("group_id"),
+                is_active=item.get("is_active", True),
+            ))
         db.flush()
 
         for item in payload["teaching_assignments"]:
-            db.add(TeachingAssignment(id=item["id"], teacher_id=item["teacher_id"], subject_id=item["subject_id"], group_id=item["group_id"], is_active=item.get("is_active", True)))
+            db.add(TeachingAssignment(
+                id=item["id"],
+                teacher_id=item["teacher_id"],
+                subject_id=item["subject_id"],
+                group_id=item["group_id"],
+                is_active=item.get("is_active", True),
+            ))
         db.flush()
 
         for item in payload["schedule_entries"]:
-            db.add(ScheduleEntry(id=item["id"], group_id=item["group_id"], subject_id=item["subject_id"], teacher_id=item["teacher_id"], teaching_assignment_id=item.get("teaching_assignment_id"), day_of_week=item["day_of_week"], lesson_number=item.get("lesson_number", 1), start_time=item.get("start_time", ""), end_time=item.get("end_time", ""), room=item.get("room"), lesson_type=item.get("lesson_type", "Занятие"), is_active=item.get("is_active", True)))
+            db.add(ScheduleEntry(
+                id=item["id"],
+                group_id=item["group_id"],
+                subject_id=item["subject_id"],
+                teacher_id=item["teacher_id"],
+                teaching_assignment_id=item.get("teaching_assignment_id"),
+                day_of_week=item["day_of_week"],
+                lesson_number=item.get("lesson_number", 1),
+                start_time=item.get("start_time", ""),
+                end_time=item.get("end_time", ""),
+                room=item.get("room"),
+                lesson_type=item.get("lesson_type", "Занятие"),
+                is_active=item.get("is_active", True),
+            ))
+
         for item in payload["assignments"]:
-            db.add(Assignment(id=item["id"], title=item["title"], description=item.get("description"), due_date=item.get("due_date"), teacher_id=item["teacher_id"], subject_id=item["subject_id"], group_id=item["group_id"], is_active=item.get("is_active", True)))
+            db.add(Assignment(
+                id=item["id"],
+                title=item["title"],
+                description=item.get("description"),
+                due_date=item.get("due_date"),
+                teacher_id=item["teacher_id"],
+                subject_id=item["subject_id"],
+                group_id=item["group_id"],
+                is_active=item.get("is_active", True),
+            ))
+
         db.commit()
         return RedirectResponse(url="/admin?imported=1", status_code=303)
     except UnicodeDecodeError:
