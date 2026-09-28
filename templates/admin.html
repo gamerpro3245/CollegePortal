@@ -19,7 +19,7 @@
   <div class="admin-actions backup-actions">
     <a class="admin-action" href="/admin/export"><strong>Скачать</strong><span>Резервная копия</span><b>→</b></a>
     <form action="/admin/import" method="post" enctype="multipart/form-data" class="backup-form">
-      <label class="admin-action backup-upload"><strong>Загрузить</strong><span>Выбрать файл</span><b>→</b><input type="file" name="backup" accept=".json,application/json" required></label>
+      <label class="admin-action backup-upload"><strong>Загрузить</strong><span>Выбрать файл</span><b>→</b><input type="file" name="backup" accept=".json,application/json" required onchange="this.form.submit()"></label>
     </form>
   </div>
   <div class="admin-actions">
