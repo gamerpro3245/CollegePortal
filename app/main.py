@@ -1,4 +1,5 @@
 from datetime import date
+import json
 
 from fastapi import Cookie, Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -208,6 +209,47 @@ async def freshman_page(request: Request):
 @app.get("/certificates", response_class=HTMLResponse)
 async def certificates_page(request: Request):
     return templates.TemplateResponse(request=request, name="certificates.html", context=template_context(request))
+
+@app.get("/admin/export", response_class=Response)
+async def admin_export(access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+
+    payload = {
+        "version": 1,
+        "exported_at": date.today().isoformat(),
+        "groups": [
+            {"id": x.id, "name": x.name, "course": x.course, "is_active": x.is_active}
+            for x in db.scalars(select(Group)).all()
+        ],
+        "subjects": [
+            {"id": x.id, "name": x.name, "code": x.code, "is_active": x.is_active}
+            for x in db.scalars(select(Subject)).all()
+        ],
+        "users": [
+            {"id": x.id, "username": x.username, "full_name": x.full_name, "role": x.role, "group_id": x.group_id, "is_active": x.is_active}
+            for x in db.scalars(select(User)).all()
+        ],
+        "teaching_assignments": [
+            {"id": x.id, "teacher_id": x.teacher_id, "subject_id": x.subject_id, "group_id": x.group_id, "is_active": x.is_active}
+            for x in db.scalars(select(TeachingAssignment)).all()
+        ],
+        "schedule_entries": [
+            {"id": x.id, "group_id": x.group_id, "subject_id": x.subject_id, "teacher_id": x.teacher_id, "teaching_assignment_id": x.teaching_assignment_id, "day_of_week": x.day_of_week, "lesson_number": x.lesson_number, "start_time": x.start_time, "end_time": x.end_time, "room": x.room, "lesson_type": x.lesson_type, "is_active": x.is_active}
+            for x in db.scalars(select(ScheduleEntry)).all()
+        ],
+        "assignments": [
+            {"id": x.id, "title": x.title, "description": x.description, "due_date": x.due_date, "teacher_id": x.teacher_id, "subject_id": x.subject_id, "group_id": x.group_id, "is_active": x.is_active}
+            for x in db.scalars(select(Assignment)).all()
+        ],
+    }
+    body = json.dumps(payload, ensure_ascii=False, indent=2)
+    return Response(
+        content=body,
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="collegeportal-backup.json"'},
+    )
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
