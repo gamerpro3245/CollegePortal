@@ -58,3 +58,7 @@
 @media(max-width:680px){.schedule-grid{min-width:0}.schedule-grid .schedule-period-col{width:42px}.schedule-grid thead th{font-size:9px;padding:5px 2px}.schedule-grid tbody th{font-size:9px}.schedule-grid td{height:58px}.schedule-lesson{min-height:58px;padding:5px 3px}.schedule-subject{font-size:9px}.schedule-room{font-size:8px}.schedule-teacher{font-size:7px}.schedule-course-tabs a{font-size:9px;padding:7px 3px}.schedule-day-tabs a{font-size:9px;padding:7px 4px}}
 
 .danger-button.compact{padding:6px 9px;font-size:10px}
+
+/* Navigation separators */
+.nav-section{margin-top:10px;padding-top:7px;border-top:1px solid var(--line)}
+.nav-section:first-of-type{margin-top:4px;padding-top:0;border-top:0}
