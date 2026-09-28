@@ -122,3 +122,14 @@
 .admin-page-fix .backup-upload{position:relative;cursor:pointer}
 .admin-page-fix .backup-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 @media(max-width:680px){.admin-page-fix .backup-actions{grid-template-columns:1fr}.admin-page-fix .backup-form{width:100%}}
+
+/* Final admin backup layout override */
+.admin-page-fix .backup-actions{display:grid!important;grid-template-columns:1fr 1fr!important;align-items:stretch!important;gap:8px!important}
+.admin-page-fix .backup-form{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important;min-width:0!important}
+.admin-page-fix .backup-upload,.admin-page-fix .backup-submit{width:100%!important;min-width:0!important;margin:0!important;box-sizing:border-box!important}
+.admin-page-fix .backup-upload{cursor:pointer;position:relative}
+.admin-page-fix .backup-upload input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+@media(max-width:680px){
+ .admin-page-fix .backup-actions{grid-template-columns:1fr!important}
+ .admin-page-fix .backup-form{grid-template-columns:1fr!important}
+}
