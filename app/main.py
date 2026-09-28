@@ -231,7 +231,12 @@ async def admin_import(
             return RedirectResponse(url="/admin?import_error=structure", status_code=303)
 
         # Restore is intentionally limited to an empty database.
-        if any(db.scalar(select(model.id).limit(1)) is not None for model in (User, Group, Subject, TeachingAssignment, ScheduleEntry, Assignment)):
+        has_non_admin_users = db.scalar(select(User.id).where(User.role != "admin").limit(1)) is not None
+        has_portal_data = has_non_admin_users or any(
+            db.scalar(select(model.id).limit(1)) is not None
+            for model in (Group, Subject, TeachingAssignment, ScheduleEntry, Assignment)
+        )
+        if has_portal_data:
             return RedirectResponse(url="/admin?import_error=not_empty", status_code=303)
 
         for item in payload["groups"]:
@@ -241,6 +246,8 @@ async def admin_import(
         db.flush()
 
         for item in payload["users"]:
+            if item.get("role") == "admin":
+                continue
             db.add(User(id=item["id"], username=item["username"], password_hash="!IMPORT_PASSWORD_RESET!", full_name=item["full_name"], role=item["role"], group_id=item.get("group_id"), is_active=False))
         db.flush()
 
