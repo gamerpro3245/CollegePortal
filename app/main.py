@@ -67,9 +67,14 @@ async def home(request: Request, access_token: str | None = Cookie(default=None)
 async def home_health():
     return Response(status_code=200)
 
-@app.get("/healthz", response_class=HTMLResponse)
-async def healthz():
-    return "ok"
+@app.api_route("/healthz", methods=["GET", "HEAD", "OPTIONS"])
+async def healthz(request: Request):
+    return Response(
+        content="" if request.method != "GET" else "ok",
+        status_code=200 if request.method != "OPTIONS" else 204,
+        media_type="text/plain",
+        headers={"Cache-Control": "no-store", "Allow": "GET, HEAD, OPTIONS"},
+    )
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
