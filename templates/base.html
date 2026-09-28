@@ -15,7 +15,7 @@
 </div>
 <div class="topbar-right">
 {% if user %}
-<button class="top-icon-button notification-button" id="notificationButton" type="button" aria-label="Уведомления" title="Уведомления"><span class="emoji-icon" aria-hidden="true">🔔</span><i class="notification-dot" hidden></i></button><button class="top-icon-button theme-button" id="themeButton" type="button" aria-label="Сменить тему" title="Тёмная тема"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+<button class="top-icon-button notification-button" id="notificationButton" type="button" aria-label="Уведомления" title="Уведомления"><span class="emoji-icon" aria-hidden="true">🔔</span></button><button class="top-icon-button theme-button" id="themeButton" type="button" aria-label="Сменить тему" title="Тёмная тема"><span class="theme-icon" aria-hidden="true">🌙</span></button>
 <details class="account-menu"><summary><span class="account-avatar">{{ user.full_name[0] | upper }}</span><span class="account-copy"><strong>{{ user.full_name }}</strong><small>{{ user.role }}</small></span><b>⌄</b></summary>
 <div class="account-dropdown">
 {% if user.role == "student" %}<a href="/student">Личный кабинет</a>{% elif user.role == "teacher" %}<a href="/teacher">Рабочий кабинет</a>{% else %}<a href="/admin">Админ-панель</a>{% endif %}
