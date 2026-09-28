@@ -12,16 +12,11 @@
 </section>
 <section class="panel">
   <div class="panel-header"><div><span class="panel-label">Инструменты</span><h3>Управление</h3></div></div>
-  <div class="admin-note postgres-notice"><strong>PostgreSQL Free</strong><span>Бесплатная база Render имеет ограниченный срок. Сохраняй резервную копию заранее.</span></div>
-  <div class="backup-panel">
-    <div class="backup-copy"><strong>Резервная копия</strong><span>Сохрани данные портала или восстанови их в пустой базе.</span></div>
-    <div class="backup-actions">
-      <a class="backup-button" href="/admin/export">Скачать JSON</a>
-      <form action="/admin/import" method="post" enctype="multipart/form-data" class="backup-form">
-        <label class="file-button">Выбрать JSON<input type="file" name="backup" accept=".json,application/json" required></label>
-        <button class="primary-button" type="submit">Восстановить</button>
-      </form>
-    </div>
+  <div class="admin-actions backup-actions">
+    <a class="admin-action" href="/admin/export"><strong>Скачать</strong><span>Резервная копия</span><b>→</b></a>
+    <form action="/admin/import" method="post" enctype="multipart/form-data" class="backup-form">
+      <label class="admin-action backup-upload"><strong>Загрузить</strong><span>Выбрать копию</span><b>→</b><input type="file" name="backup" accept=".json,application/json" required></label>
+    </form>
   </div>
   <div class="admin-actions">
     <a class="admin-action" href="/admin/students"><strong>Студенты</strong><span>Создание, просмотр и удаление учебных аккаунтов.</span><b>Открыть →</b></a>
