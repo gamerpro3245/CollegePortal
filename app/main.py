@@ -22,10 +22,11 @@ def ensure_database_schema():
 
 @app.middleware("http")
 async def load_current_user(request: Request, call_next):
-    # Uptime/health monitors may use HEAD or OPTIONS. Handle them explicitly
-    # so a healthy service never reports HTTP 405 for a health check.
+    # Monitoring probes must not depend on the database.
     if request.method == "HEAD" and request.url.path == "/":
-        return Response(status_code=200)
+        return Response(status_code=200, headers={"Cache-Control": "no-store"})
+    if request.url.path == "/healthz":
+        return Response(status_code=200, content="ok", media_type="text/plain", headers={"Cache-Control": "no-store"})
     if request.method == "OPTIONS" and request.url.path in {"/", "/healthz"}:
         return Response(status_code=204, headers={"Allow": "GET, HEAD, OPTIONS"})
     db = next(get_db())
