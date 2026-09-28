@@ -82,3 +82,30 @@
 .backup-panel{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}.backup-copy{display:grid;gap:3px}.backup-copy strong{font-size:14px}.backup-copy span{font-size:11px;color:var(--muted)}.backup-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.backup-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.file-button{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:12px;background:var(--soft)}.file-button input{display:none}.primary-button{min-height:38px;border:0;border-radius:10px;padding:0 14px;cursor:pointer;background:var(--accent);color:#fff;font-weight:600}@media(max-width:680px){.backup-actions,.backup-form{width:100%;display:grid;grid-template-columns:1fr}.file-button,.primary-button,.admin-action{width:100%;justify-content:center;text-align:center;box-sizing:border-box}}
 
 .postgres-notice{border-style:dashed}.postgres-notice strong{font-size:13px}
+
+/* Admin mobile cleanup */
+.admin-page-fix{min-width:0;max-width:100%;overflow:hidden}
+.admin-page-fix *{box-sizing:border-box}
+.admin-page-fix .panel,.admin-page-fix .admin-stat,.admin-page-fix .admin-action,.admin-page-fix .backup-panel,.admin-page-fix .admin-note{min-width:0}
+.admin-page-fix .admin-action strong,.admin-page-fix .admin-action span,.admin-page-fix .admin-action b,.admin-page-fix .admin-note span{overflow-wrap:anywhere;word-break:break-word}
+.admin-note{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;background:var(--soft)}
+.admin-note strong{font-size:12px;white-space:nowrap}
+.admin-note span{font-size:11px;color:var(--muted);line-height:1.4}
+.backup-panel{padding:14px}
+.backup-copy{min-width:0}
+.backup-copy strong{font-size:13px}
+.backup-copy span{font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+.backup-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;min-width:0}
+.backup-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;min-width:0}
+.backup-button,.file-button,.primary-button{min-width:0;min-height:38px;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 10px;border-radius:10px;font-size:11px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+.backup-button{border:1px solid var(--line);background:var(--surface);color:var(--text);text-decoration:none}
+.primary-button{border:0;background:var(--primary);color:#fff;font-weight:600}
+@media(max-width:680px){
+ .admin-page-fix .admin-grid{grid-template-columns:1fr}
+ .admin-page-fix .admin-actions{grid-template-columns:1fr}
+ .admin-note{display:grid;gap:3px}
+ .admin-note strong{white-space:normal}
+ .backup-actions{grid-template-columns:1fr}
+ .backup-form{grid-template-columns:1fr}
+ .backup-button,.file-button,.primary-button{min-height:42px}
+}
