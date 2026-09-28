@@ -174,6 +174,28 @@ async def attendance_page(request: Request):
 async def materials_page(request: Request):
     return templates.TemplateResponse(request=request, name="materials.html", context=template_context(request))
 
+@app.get("/notifications", response_class=HTMLResponse)
+async def notifications_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    today = date.today().isoformat()
+    query = select(Assignment).where(
+        Assignment.is_active.is_(True),
+        (Assignment.due_date.is_(None)) | (Assignment.due_date >= today),
+    ).options(joinedload(Assignment.subject), joinedload(Assignment.group)).order_by(Assignment.id.desc())
+    if user.role == "student":
+        items = db.scalars(query.where(Assignment.group_id == user.group_id)).all() if user.group_id else []
+    elif user.role == "teacher":
+        items = db.scalars(query.where(Assignment.teacher_id == user.id)).all()
+    else:
+        items = db.scalars(query).all()
+    notifications = [
+        {"title": item.title, "text": item.subject.name + " · " + item.group.name, "meta": ("Срок: " + item.due_date) if item.due_date else "Без срока", "href": "/assignments"}
+        for item in items
+    ]
+    return templates.TemplateResponse(request=request, name="notifications.html", context=template_context(request, notifications=notifications))
+
 @app.get("/announcements", response_class=HTMLResponse)
 async def announcements_page(request: Request):
     return templates.TemplateResponse(request=request, name="announcements.html", context=template_context(request))
