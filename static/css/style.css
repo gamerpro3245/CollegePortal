@@ -138,3 +138,36 @@
 .notification-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important;min-width:0!important}
 .notification-copy strong{display:block!important;line-height:1.25!important}
 .notification-copy > span{display:block!important;line-height:1.45!important;white-space:normal!important}
+
+/* Mobile notification badge */
+.notification-button{position:relative!important;overflow:visible!important}
+.notification-button .notification-count{
+  position:absolute!important;
+  top:-2px!important;
+  right:-3px!important;
+  min-width:17px!important;
+  height:17px!important;
+  padding:0 4px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:999px!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  line-height:17px!important;
+  white-space:nowrap!important;
+  z-index:5!important;
+}
+@media(max-width:680px){
+  .notification-button{width:42px!important;height:42px!important;flex:0 0 42px!important}
+  .notification-button .notification-count{
+    top:1px!important;
+    right:0!important;
+    min-width:15px!important;
+    height:15px!important;
+    padding:0 3px!important;
+    font-size:8px!important;
+    line-height:15px!important;
+  }
+}
