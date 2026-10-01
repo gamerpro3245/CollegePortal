@@ -517,7 +517,15 @@ async def admin_create_schedule(group_id: int = Form(...), subject_id: int = For
     teacher_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.is_active.is_(True), ScheduleEntry.teacher_id == teacher_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.lesson_number == lesson_number)).first()
     if teacher_conflict:
         return RedirectResponse(url="/admin/schedule?error=teacher_conflict", status_code=303)
-    db.add(ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, lesson_number=lesson_number, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True))
+    entry = ScheduleEntry(group_id=group_id, subject_id=subject_id, teacher_id=teacher_id, teaching_assignment_id=assignment.id, day_of_week=day_of_week, lesson_number=lesson_number, start_time=start_time, end_time=end_time, room=room.strip() or None, lesson_type=lesson_type.strip() or "Занятие", is_active=True)
+    db.add(entry)
+    students = db.scalars(select(User).where(User.role == "student", User.group_id == group_id, User.is_active.is_(True))).all()
+    day_names = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
+    room_text = f" · каб. {entry.room}" if entry.room else ""
+    message = f"{day_names[day_of_week]}, {lesson_number} пара · {subject.name}{room_text}"
+    for student in students:
+        create_notification(db, student.id, "Расписание изменено", message, "/schedule")
+    create_notification(db, teacher.id, "Вам добавили занятие", message, "/schedule")
     db.commit()
     return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
 
@@ -566,6 +574,13 @@ async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subjec
     entry.end_time = end_time
     entry.room = room.strip() or None
     entry.lesson_type = lesson_type.strip() or "Занятие"
+    students = db.scalars(select(User).where(User.role == "student", User.group_id == group_id, User.is_active.is_(True))).all()
+    day_names = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
+    room_text = f" · каб. {entry.room}" if entry.room else ""
+    message = f"{day_names[day_of_week]}, {lesson_number} пара · {subject.name}{room_text}"
+    for student in students:
+        create_notification(db, student.id, "Расписание изменено", message, "/schedule")
+    create_notification(db, teacher.id, "Расписание изменено", message, "/schedule")
     db.commit()
     return RedirectResponse(url="/admin/schedule?updated=1", status_code=303)
 
@@ -577,6 +592,14 @@ async def admin_delete_schedule(entry_id: int, access_token: str | None = Cookie
     entry = db.get(ScheduleEntry, entry_id)
     if entry:
         entry.is_active = False
+        students = db.scalars(select(User).where(User.role == "student", User.group_id == entry.group_id, User.is_active.is_(True))).all()
+        subject = db.get(Subject, entry.subject_id)
+        body = f"{entry.lesson_number} пара · {subject.name if subject else 'Занятие'}"
+        for student in students:
+            create_notification(db, student.id, "Занятие отменено", body, "/schedule")
+        teacher = db.get(User, entry.teacher_id)
+        if teacher:
+            create_notification(db, teacher.id, "Занятие отменено", body, "/schedule")
         db.commit()
     return RedirectResponse(url="/admin/schedule", status_code=303)
 
