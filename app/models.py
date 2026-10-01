@@ -100,3 +100,16 @@ class Assignment(Base):
     teacher: Mapped["User"] = relationship()
     subject: Mapped["Subject"] = relationship()
     group: Mapped["Group"] = relationship()
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(180), nullable=False)
+    body: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    href: Mapped[str] = mapped_column(String(255), default="/notifications")
+    is_read: Mapped[bool] = mapped_column(default=False, index=True)
+
+    user: Mapped["User"] = relationship()
