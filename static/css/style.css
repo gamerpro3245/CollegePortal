@@ -133,3 +133,8 @@
  .admin-page-fix .backup-actions{grid-template-columns:1fr!important}
  .admin-page-fix .backup-form{grid-template-columns:1fr!important}
 }
+
+/* Notification text separation */
+.notification-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important;min-width:0!important}
+.notification-copy strong{display:block!important;line-height:1.25!important}
+.notification-copy > span{display:block!important;line-height:1.45!important;white-space:normal!important}
