@@ -209,8 +209,37 @@ async def notification_read(notification_id: int, access_token: str | None = Coo
     return RedirectResponse(url="/notifications", status_code=303)
 
 @app.get("/announcements", response_class=HTMLResponse)
-async def announcements_page(request: Request):
-    return templates.TemplateResponse(request=request, name="announcements.html", context=template_context(request))
+async def announcements_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    notifications = db.scalars(
+        select(Notification).where(
+            Notification.user_id == user.id,
+            Notification.href == "/announcements",
+        ).order_by(Notification.is_read, Notification.id.desc())
+    ).all()
+    return templates.TemplateResponse(request=request, name="announcements.html", context=template_context(request, notifications=notifications))
+
+@app.post("/admin/announcements/create")
+async def admin_create_announcement(
+    title: str = Form(...),
+    body: str = Form(default=""),
+    access_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    user = require_admin(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    title = title.strip()
+    body = body.strip()
+    if not title:
+        return RedirectResponse(url="/admin?announcement_error=title", status_code=303)
+    recipients = db.scalars(select(User).where(User.is_active.is_(True), User.role.in_(["student", "teacher"]))).all()
+    for recipient in recipients:
+        create_notification(db, recipient.id, title, body, "/announcements")
+    db.commit()
+    return RedirectResponse(url="/admin?announcement_created=1", status_code=303)
 
 @app.get("/freshman", response_class=HTMLResponse)
 async def freshman_page(request: Request):
