@@ -15,6 +15,13 @@
   <div class="admin-stat"><span>03 / ЗАНЯТИЯ</span><strong>{{ schedule_count }}</strong><small>В расписании</small></div>
 </section>
 <section class="panel">
+  <div class="panel-header"><div><span class="panel-label">Уведомления</span><h3>Новое объявление</h3></div></div>
+  <form action="/admin/announcements/create" method="post" class="admin-form">
+    <div class="form-row"><label>Заголовок<input name="title" required maxlength="180"></label><label>Текст<input name="body" maxlength="500"></label></div>
+    <button class="primary-button" type="submit">Опубликовать</button>
+  </form>
+</section>
+<section class="panel">
   <div class="panel-header"><div><span class="panel-label">Инструменты</span><h3>Управление</h3></div></div>
   <div class="admin-actions backup-actions">
     <a class="admin-action" href="/admin/export"><strong>Скачать</strong><span>Резервная копия</span><b>→</b></a>
