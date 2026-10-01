@@ -208,6 +208,17 @@ async def notification_read(notification_id: int, access_token: str | None = Coo
         return RedirectResponse(url=item.href or "/notifications", status_code=303)
     return RedirectResponse(url="/notifications", status_code=303)
 
+@app.post("/notifications/{notification_id}/delete")
+async def notification_delete(notification_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    item = db.scalars(select(Notification).where(Notification.id == notification_id, Notification.user_id == user.id)).first()
+    if item:
+        db.delete(item)
+        db.commit()
+    return RedirectResponse(url="/notifications", status_code=303)
+
 @app.get("/announcements", response_class=HTMLResponse)
 async def announcements_page(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
     user = get_current_user(access_token, db)
