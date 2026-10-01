@@ -15,7 +15,7 @@
 </div>
 <div class="topbar-right">
 {% if user %}
-<a class="top-icon-button notification-button" id="notificationButton" href="/notifications" aria-label="Уведомления" title="Уведомления"><span class="emoji-icon" aria-hidden="true">🔔</span></a><button class="top-icon-button theme-button" id="themeButton" type="button" aria-label="Сменить тему" title="Тёмная тема"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+<a class="top-icon-button notification-button" id="notificationButton" href="/notifications" aria-label="Уведомления" title="Уведомления"><span class="emoji-icon" aria-hidden="true">🔔</span>{% if unread_notifications %}<span class="notification-count">{{ unread_notifications if unread_notifications < 100 else "99+" }}</span>{% endif %}</a><button class="top-icon-button theme-button" id="themeButton" type="button" aria-label="Сменить тему" title="Тёмная тема"><span class="theme-icon" aria-hidden="true">🌙</span></button>
 <details class="account-menu"><summary><span class="account-avatar">{{ user.full_name[0] | upper }}</span><span class="account-copy"><strong>{{ user.full_name }}</strong><small>{{ user.role }}</small></span><b>⌄</b></summary>
 <div class="account-dropdown">
 {% if user.role == "student" %}<a href="/student">Личный кабинет</a>{% elif user.role == "teacher" %}<a href="/teacher">Рабочий кабинет</a>{% else %}<a href="/admin">Админ-панель</a>{% endif %}
