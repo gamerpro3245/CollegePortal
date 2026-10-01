@@ -6,13 +6,18 @@
   {% if notifications %}
   <div class="notification-list">
     {% for item in notifications %}
-    <form method="post" action="/notifications/{{ item.id }}/read" class="notification-card{% if not item.is_read %} unread{% endif %}">
-      <button class="notification-open" type="submit">
-        <span class="notification-icon">🔔</span>
-        <span class="notification-copy"><strong>{{ item.title }}</strong>{% if item.body %}<span>{{ item.body }}</span>{% endif %}</span>
-        <span class="notification-meta">{% if not item.is_read %}Новое{% else %}Прочитано{% endif %}</span>
-      </button>
-    </form>
+    <div class="notification-card{% if not item.is_read %} unread{% endif %}">
+      <form method="post" action="/notifications/{{ item.id }}/read" class="notification-main-form">
+        <button class="notification-open" type="submit">
+          <span class="notification-icon">🔔</span>
+          <span class="notification-copy"><strong>{{ item.title }}</strong>{% if item.body %}<span>{{ item.body }}</span>{% endif %}</span>
+          <span class="notification-meta">{% if not item.is_read %}Новое{% else %}Прочитано{% endif %}</span>
+        </button>
+      </form>
+      <form method="post" action="/notifications/{{ item.id }}/delete" class="notification-delete-form" onsubmit="return confirm('Удалить это уведомление?');">
+        <button class="notification-delete" type="submit" aria-label="Удалить уведомление" title="Удалить">Удалить</button>
+      </form>
+    </div>
     {% endfor %}
   </div>
   {% else %}
