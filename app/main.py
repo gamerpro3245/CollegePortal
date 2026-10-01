@@ -33,12 +33,25 @@ async def load_current_user(request: Request, call_next):
     db = next(get_db())
     try:
         request.state.user = get_current_user(request.cookies.get("access_token"), db)
+        request.state.unread_notifications = 0
+        if request.state.user:
+            request.state.unread_notifications = len(
+                db.scalars(
+                    select(Notification.id).where(
+                        Notification.user_id == request.state.user.id,
+                        Notification.is_read.is_(False),
+                    )
+                ).all()
+            )
         return await call_next(request)
     finally:
         db.close()
 
 def template_context(request: Request, **extra):
-    context = {"user": getattr(request.state, "user", None)}
+    context = {
+        "user": getattr(request.state, "user", None),
+        "unread_notifications": getattr(request.state, "unread_notifications", 0),
+    }
     context.update(extra)
     return context
 
@@ -248,7 +261,7 @@ async def admin_create_announcement(
         return RedirectResponse(url="/admin?announcement_error=title", status_code=303)
     recipients = db.scalars(select(User).where(User.is_active.is_(True), User.role.in_(["student", "teacher"]))).all()
     for recipient in recipients:
-        create_notification(db, recipient.id, title, body, "/announcements")
+        create_notification(db, recipient.id, title, body, "/notifications")
     db.commit()
     return RedirectResponse(url="/admin?announcement_created=1", status_code=303)
 
