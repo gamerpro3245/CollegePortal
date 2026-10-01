@@ -3,15 +3,16 @@
 {% block page_title %}Уведомления{% endblock %}
 {% block content %}
 <section class="notifications-page">
-  
   {% if notifications %}
   <div class="notification-list">
     {% for item in notifications %}
-    <a class="notification-card" href="{{ item.href }}">
-      <span class="notification-icon">🔔</span>
-      <span class="notification-copy"><strong>{{ item.title }}</strong><span>{{ item.text }}</span></span>
-      <span class="notification-meta">{{ item.meta }}</span>
-    </a>
+    <form method="post" action="/notifications/{{ item.id }}/read" class="notification-card{% if not item.is_read %} unread{% endif %}">
+      <button class="notification-open" type="submit">
+        <span class="notification-icon">🔔</span>
+        <span class="notification-copy"><strong>{{ item.title }}</strong>{% if item.body %}<span>{{ item.body }}</span>{% endif %}</span>
+        <span class="notification-meta">{% if not item.is_read %}Новое{% else %}Прочитано{% endif %}</span>
+      </button>
+    </form>
     {% endfor %}
   </div>
   {% else %}
