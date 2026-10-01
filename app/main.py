@@ -11,7 +11,7 @@ import jwt
 
 from app.auth import ALGORITHM, SECRET_KEY, create_access_token, get_user_by_username, verify_password, password_hash
 from app.database import Base, engine, get_db
-from app.models import Assignment, Group, ScheduleEntry, Subject, TeachingAssignment, User
+from app.models import Assignment, Group, Notification, ScheduleEntry, Subject, TeachingAssignment, User
 
 app = FastAPI(title="Портал колледжа")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -54,6 +54,9 @@ def get_current_user(access_token: str | None, db: Session):
         return user if user and user.is_active else None
     except jwt.PyJWTError:
         return None
+
+def create_notification(db: Session, user_id: int, title: str, body: str | None = None, href: str = "/notifications"):
+    db.add(Notification(user_id=user_id, title=title, body=body, href=href, is_read=False))
 
 def require_admin(access_token: str | None, db: Session):
     user = get_current_user(access_token, db)
@@ -113,7 +116,11 @@ async def teacher_assignment_create(title: str = Form(...), description: str = F
     teaching = db.scalars(select(TeachingAssignment).where(TeachingAssignment.id == teaching_assignment_id, TeachingAssignment.teacher_id == user.id, TeachingAssignment.is_active.is_(True))).first()
     if not teaching or not title.strip():
         return RedirectResponse(url="/teacher/assignments/new?error=invalid", status_code=303)
-    db.add(Assignment(title=title.strip(), description=description.strip() or None, due_date=due_date.strip() or None, teacher_id=user.id, subject_id=teaching.subject_id, group_id=teaching.group_id, is_active=True))
+    assignment = Assignment(title=title.strip(), description=description.strip() or None, due_date=due_date.strip() or None, teacher_id=user.id, subject_id=teaching.subject_id, group_id=teaching.group_id, is_active=True)
+    db.add(assignment)
+    students = db.scalars(select(User).where(User.role == "student", User.group_id == teaching.group_id, User.is_active.is_(True))).all()
+    for student in students:
+        create_notification(db, student.id, "Новое задание", assignment.title, "/assignments")
     db.commit()
     return RedirectResponse(url="/assignments?created=1", status_code=303)
 
@@ -186,22 +193,20 @@ async def notifications_page(request: Request, access_token: str | None = Cookie
     user = get_current_user(access_token, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
-    today = date.today().isoformat()
-    query = select(Assignment).where(
-        Assignment.is_active.is_(True),
-        (Assignment.due_date.is_(None)) | (Assignment.due_date >= today),
-    ).options(joinedload(Assignment.subject), joinedload(Assignment.group)).order_by(Assignment.id.desc())
-    if user.role == "student":
-        items = db.scalars(query.where(Assignment.group_id == user.group_id)).all() if user.group_id else []
-    elif user.role == "teacher":
-        items = db.scalars(query.where(Assignment.teacher_id == user.id)).all()
-    else:
-        items = db.scalars(query).all()
-    notifications = [
-        {"title": item.title, "text": item.subject.name + " · " + item.group.name, "meta": ("Срок: " + item.due_date) if item.due_date else "Без срока", "href": "/assignments"}
-        for item in items
-    ]
+    notifications = db.scalars(select(Notification).where(Notification.user_id == user.id).order_by(Notification.is_read, Notification.id.desc())).all()
     return templates.TemplateResponse(request=request, name="notifications.html", context=template_context(request, notifications=notifications))
+
+@app.post("/notifications/{notification_id}/read")
+async def notification_read(notification_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    user = get_current_user(access_token, db)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    item = db.scalars(select(Notification).where(Notification.id == notification_id, Notification.user_id == user.id)).first()
+    if item:
+        item.is_read = True
+        db.commit()
+        return RedirectResponse(url=item.href or "/notifications", status_code=303)
+    return RedirectResponse(url="/notifications", status_code=303)
 
 @app.get("/announcements", response_class=HTMLResponse)
 async def announcements_page(request: Request):
