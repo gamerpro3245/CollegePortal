@@ -171,3 +171,11 @@
     line-height:15px!important;
   }
 }
+
+/* Registration and authentication links */
+.auth-switch{margin:18px 0 0!important;text-align:center;color:var(--muted);font-size:12px!important;line-height:1.6!important}
+.auth-switch a{color:var(--primary);font-weight:800;text-decoration:none}
+.auth-switch a:hover{text-decoration:underline}
+.registration-note{margin:0!important;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--muted);font-size:12px!important;line-height:1.5!important}
+.form-field small{font-size:11px;line-height:1.4;color:var(--muted)}
+@media(max-width:520px){.login-layout{padding:12px 0}.login-card{padding:22px 18px;border-radius:18px}.login-card h2{font-size:23px}.form-field input,.form-field select{font-size:14px}.form-field label{font-size:10px}.submit-button{font-size:13px}}
