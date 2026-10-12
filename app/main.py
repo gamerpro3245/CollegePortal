@@ -484,7 +484,28 @@ async def admin_students(request: Request, access_token: str | None = Cookie(def
         return RedirectResponse(url="/login", status_code=303)
     students = db.scalars(select(User).where(User.role == "student").options(joinedload(User.group)).order_by(User.full_name)).all()
     groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
-    return templates.TemplateResponse(request=request, name="admin_students.html", context={"user": user, "students": students, "groups": groups})
+    return templates.TemplateResponse(request=request, name="admin_students.html", context={"request": request, "user": user, "students": students, "groups": groups, "updated": request.query_params.get("updated")})
+
+@app.post("/admin/students/{student_id}/group")
+async def admin_assign_student_group(student_id: int, group_id: str = Form(default=""), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    admin = require_admin(access_token, db)
+    if not admin:
+        return RedirectResponse(url="/login", status_code=303)
+    student = db.scalars(select(User).where(User.id == student_id, User.role == "student")).first()
+    if not student:
+        return RedirectResponse(url="/admin/students", status_code=303)
+    if group_id.strip():
+        try:
+            selected_group = db.scalars(select(Group).where(Group.id == int(group_id), Group.is_active.is_(True))).first()
+        except ValueError:
+            selected_group = None
+        if not selected_group:
+            return RedirectResponse(url="/admin/students?updated=invalid-group", status_code=303)
+        student.group_id = selected_group.id
+    else:
+        student.group_id = None
+    db.commit()
+    return RedirectResponse(url="/admin/students?updated=1", status_code=303)
 
 @app.post("/admin/students/create")
 async def admin_create_student(full_name: str = Form(...), username: str = Form(...), password: str = Form(...), group_id: int | None = Form(default=None), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
