@@ -96,6 +96,60 @@ async def healthz(request: Request):
 async def login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html", context={})
 
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request, db: Session = Depends(get_db)):
+    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.course, Group.name)).all()
+    return templates.TemplateResponse(
+        request=request,
+        name="register.html",
+        context={"request": request, "groups": groups, "error": request.query_params.get("error")},
+    )
+
+@app.post("/register")
+async def register_student(
+    request: Request,
+    full_name: str = Form(...),
+    username: str = Form(...),
+    password: str = Form(...),
+    password_confirm: str = Form(...),
+    group_id: str = Form(default=""),
+    db: Session = Depends(get_db),
+):
+    full_name = full_name.strip()
+    username = username.strip()
+    if len(full_name) < 2 or len(full_name) > 150:
+        return RedirectResponse(url="/register?error=name", status_code=303)
+    if len(username) < 3 or len(username) > 50 or not all(ch.isalnum() or ch in "._-" for ch in username):
+        return RedirectResponse(url="/register?error=username", status_code=303)
+    if len(password) < 8:
+        return RedirectResponse(url="/register?error=password", status_code=303)
+    if password != password_confirm:
+        return RedirectResponse(url="/register?error=match", status_code=303)
+    if db.scalars(select(User).where(User.username == username)).first():
+        return RedirectResponse(url="/register?error=taken", status_code=303)
+    selected_group = None
+    if group_id:
+        try:
+            selected_group = db.get(Group, int(group_id))
+        except (TypeError, ValueError):
+            selected_group = None
+        if not selected_group or not selected_group.is_active:
+            return RedirectResponse(url="/register?error=group", status_code=303)
+    user = User(
+        username=username,
+        password_hash=password_hash.hash(password),
+        full_name=full_name,
+        role="student",
+        group_id=selected_group.id if selected_group else None,
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    token = create_access_token(username=user.username, role=user.role)
+    response = RedirectResponse(url="/student", status_code=303)
+    response.set_cookie(key="access_token", value=token, httponly=True, secure=True, samesite="lax", path="/", max_age=60 * 60 * 24 * 7)
+    return response
+
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = get_user_by_username(db, username)
