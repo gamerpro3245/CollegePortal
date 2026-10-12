@@ -112,7 +112,6 @@ async def register_student(
     username: str = Form(...),
     password: str = Form(...),
     password_confirm: str = Form(...),
-    group_id: str = Form(default=""),
     db: Session = Depends(get_db),
 ):
     full_name = full_name.strip()
@@ -127,27 +126,19 @@ async def register_student(
         return RedirectResponse(url="/register?error=match", status_code=303)
     if db.scalars(select(User).where(User.username == username)).first():
         return RedirectResponse(url="/register?error=taken", status_code=303)
-    selected_group = None
-    if group_id:
-        try:
-            selected_group = db.get(Group, int(group_id))
-        except (TypeError, ValueError):
-            selected_group = None
-        if not selected_group or not selected_group.is_active:
-            return RedirectResponse(url="/register?error=group", status_code=303)
     user = User(
         username=username,
         password_hash=password_hash.hash(password),
         full_name=full_name,
         role="student",
-        group_id=selected_group.id if selected_group else None,
+        group_id=None,
         is_active=True,
     )
     db.add(user)
     db.commit()
     token = create_access_token(username=user.username, role=user.role)
     response = RedirectResponse(url="/student", status_code=303)
-    response.set_cookie(key="access_token", value=token, httponly=True, secure=True, samesite="lax", path="/", max_age=60 * 60 * 24 * 7)
+    response.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", path="/", max_age=60 * 60 * 24 * 7)
     return response
 
 @app.post("/login")
