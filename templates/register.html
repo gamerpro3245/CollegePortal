@@ -8,6 +8,9 @@
     <span class="panel-label">НОВЫЙ АККАУНТ</span>
     <h2>Регистрация студента</h2>
     <p>Создай аккаунт, чтобы пользоваться учебным порталом.</p>
+    {% if request.query_params.get("pending") == "1" %}
+      <div class="notice" role="status">Заявка отправлена. Войти можно после подтверждения администратором.</div>
+    {% endif %}
     {% if error %}
       <div class="notice notice-error" role="alert">
         {% if error == "name" %}Укажи имя от 2 до 150 символов.
