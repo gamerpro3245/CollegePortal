@@ -194,3 +194,12 @@
   .admin-table td[data-label="Действие"] .student-actions{display:flex;flex-direction:column;align-items:stretch;gap:7px}
   .student-actions form,.student-actions button{width:100%}
 }
+
+
+/* Студенты: группа и статус на всю ширину карточки на телефоне */
+@media(max-width:680px){
+  .admin-table tbody tr td[data-label="Группа"],
+  .admin-table tbody tr td[data-label="Статус"]{grid-column:1/-1;grid-template-columns:1fr;gap:4px}
+  .student-group-edit summary{cursor:pointer;padding:6px 0;font-size:12px;font-weight:700;color:var(--primary)}
+  .student-group-form{margin-top:6px}
+}
