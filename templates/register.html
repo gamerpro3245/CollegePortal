@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — CollegePortal{% endblock %}
+{% block page_title %}Регистрация{% endblock %}
+{% block content %}
+<div class="login-layout">
+  <section class="login-card">
+    <div class="login-brand"><span class="brand-mark">CP</span><div class="brand-text"><strong>CollegePortal</strong><small>Образовательная система</small></div></div>
+    <span class="panel-label">НОВЫЙ АККАУНТ</span>
+    <h2>Регистрация студента</h2>
+    <p>Создай аккаунт, чтобы пользоваться учебным порталом.</p>
+    {% if error %}
+      <div class="notice notice-error" role="alert">
+        {% if error == "name" %}Укажи имя от 2 до 150 символов.
+        {% elif error == "username" %}Логин: 3–50 символов, только латинские буквы, цифры, точка, дефис и подчёркивание.
+        {% elif error == "password" %}Пароль должен содержать не менее 8 символов.
+        {% elif error == "match" %}Пароли не совпадают.
+        {% elif error == "taken" %}Этот логин уже занят.
+        {% elif error == "group" %}Выбранная группа недоступна. Выбери её ещё раз.
+        {% else %}Не удалось создать аккаунт. Проверь данные и попробуй снова.{% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="/register" class="form-stack">
+      <div class="form-field"><label for="full_name">ИМЯ И ФАМИЛИЯ</label><input id="full_name" name="full_name" type="text" placeholder="Как к тебе обращаться" autocomplete="name" minlength="2" maxlength="150" required></div>
+      <div class="form-field"><label for="username">ЛОГИН</label><input id="username" name="username" type="text" placeholder="Придумай логин" autocomplete="username" minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" required><small>Латинские буквы, цифры, точка, дефис или подчёркивание.</small></div>
+      <div class="form-field"><label for="group_id">ГРУППА</label><select id="group_id" name="group_id"><option value="">Пока не выбрана</option>{% for group in groups %}<option value="{{ group.id }}">{{ group.name }} · {{ group.course }} курс</option>{% endfor %}</select><small>Если своей группы нет в списке, можно выбрать её позже через администратора.</small></div>
+      <div class="form-field"><label for="password">ПАРОЛЬ</label><input id="password" name="password" type="password" placeholder="Не менее 8 символов" autocomplete="new-password" minlength="8" required></div>
+      <div class="form-field"><label for="password_confirm">ПОВТОРИ ПАРОЛЬ</label><input id="password_confirm" name="password_confirm" type="password" placeholder="Ещё раз пароль" autocomplete="new-password" minlength="8" required></div>
+      <button class="submit-button" type="submit">Создать аккаунт →</button>
+    </form>
+    <p class="auth-switch">Уже есть аккаунт? <a href="/login">Войти</a></p>
+  </section>
+</div>
+{% endblock %}
