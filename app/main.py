@@ -132,14 +132,11 @@ async def register_student(
         full_name=full_name,
         role="student",
         group_id=None,
-        is_active=True,
+        is_active=False,
     )
     db.add(user)
     db.commit()
-    token = create_access_token(username=user.username, role=user.role)
-    response = RedirectResponse(url="/student", status_code=303)
-    response.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", path="/", max_age=60 * 60 * 24 * 7)
-    return response
+    return RedirectResponse(url="/register?pending=1", status_code=303)
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
@@ -468,6 +465,17 @@ async def admin_dashboard(request: Request, access_token: str | None = Cookie(de
     group_count = len(db.scalars(select(Group.id).where(Group.is_active.is_(True))).all())
     schedule_count = len(db.scalars(select(ScheduleEntry.id).where(ScheduleEntry.is_active.is_(True))).all())
     return templates.TemplateResponse(request=request, name="admin.html", context={"user": user, "student_count": student_count, "group_count": group_count, "schedule_count": schedule_count})
+
+@app.post("/admin/students/{student_id}/approve")
+async def approve_registered_student(student_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+    admin = require_admin(access_token, db)
+    if not admin:
+        return RedirectResponse(url="/login", status_code=303)
+    student = db.scalars(select(User).where(User.id == student_id, User.role == "student")).first()
+    if student:
+        student.is_active = True
+        db.commit()
+    return RedirectResponse(url="/admin/students?approved=1", status_code=303)
 
 @app.get("/admin/students", response_class=HTMLResponse)
 async def admin_students(request: Request, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
