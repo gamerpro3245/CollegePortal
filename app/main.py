@@ -11,7 +11,7 @@ import jwt
 
 from app.auth import ALGORITHM, SECRET_KEY, create_access_token, get_user_by_username, verify_password, password_hash
 from app.database import Base, engine, get_db
-from app.models import Assignment, Group, Notification, ScheduleEntry, Subject, TeachingAssignment, User
+from app.models import Assignment, Grade, Group, Notification, ScheduleEntry, Subject, TeachingAssignment, User
 
 app = FastAPI(title="Портал колледжа")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -230,6 +230,117 @@ async def teacher_delete_assignment(assignment_id: int, access_token: str | None
         assignment.is_active = False
         db.commit()
     return RedirectResponse(url="/assignments?deleted=1", status_code=303)
+
+
+@app.get("/teacher/grades", response_class=HTMLResponse)
+async def teacher_grades_page(
+    request: Request,
+    access_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    user = get_current_user(access_token, db)
+    if not user or user.role != "teacher":
+        return RedirectResponse(url="/login", status_code=303)
+
+    assignments = db.scalars(
+        select(TeachingAssignment)
+        .where(
+            TeachingAssignment.teacher_id == user.id,
+            TeachingAssignment.is_active.is_(True),
+        )
+        .options(joinedload(TeachingAssignment.subject), joinedload(TeachingAssignment.group))
+        .order_by(TeachingAssignment.id)
+    ).all()
+
+    try:
+        selected_id = int(request.query_params.get("ta", "0"))
+    except ValueError:
+        selected_id = 0
+
+    selected = next((item for item in assignments if item.id == selected_id), None)
+    students = []
+    if selected:
+        students = db.scalars(
+            select(User)
+            .where(
+                User.role == "student",
+                User.group_id == selected.group_id,
+                User.is_active.is_(True),
+            )
+            .order_by(User.full_name)
+        ).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="teacher_grades.html",
+        context=template_context(
+            request,
+            assignments=assignments,
+            selected=selected,
+            students=students,
+        ),
+    )
+
+
+@app.post("/teacher/grades/create")
+async def teacher_grade_create(
+    teaching_assignment_id: int = Form(...),
+    student_id: int = Form(...),
+    value: int = Form(...),
+    comment: str = Form(default=""),
+    access_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    user = get_current_user(access_token, db)
+    if not user or user.role != "teacher":
+        return RedirectResponse(url="/login", status_code=303)
+
+    back = f"/teacher/grades?ta={teaching_assignment_id}"
+    teaching = db.scalars(
+        select(TeachingAssignment)
+        .where(
+            TeachingAssignment.id == teaching_assignment_id,
+            TeachingAssignment.teacher_id == user.id,
+            TeachingAssignment.is_active.is_(True),
+        )
+        .options(joinedload(TeachingAssignment.subject))
+    ).first()
+
+    if not teaching or value not in (2, 3, 4, 5):
+        return RedirectResponse(url=back + "&error=invalid", status_code=303)
+
+    student = db.scalars(
+        select(User).where(
+            User.id == student_id,
+            User.role == "student",
+            User.group_id == teaching.group_id,
+            User.is_active.is_(True),
+        )
+    ).first()
+    if not student:
+        return RedirectResponse(url=back + "&error=invalid", status_code=303)
+
+    db.add(
+        Grade(
+            student_id=student.id,
+            teacher_id=user.id,
+            subject_id=teaching.subject_id,
+            value=value,
+            grade_date=date.today().isoformat(),
+            comment=comment.strip()[:300] or None,
+            is_active=True,
+        )
+    )
+    create_notification(
+        db,
+        student.id,
+        "Новая оценка",
+        f"{teaching.subject.name}: {value}",
+        "/grades",
+    )
+    db.commit()
+    return RedirectResponse(url=back + "&saved=1", status_code=303)
+
 
 @app.get("/grades", response_class=HTMLResponse)
 async def grades_page(request: Request):
@@ -648,102 +759,3 @@ async def admin_create_schedule(group_id: int = Form(...), subject_id: int = For
     db.add(entry)
     students = db.scalars(select(User).where(User.role == "student", User.group_id == group_id, User.is_active.is_(True))).all()
     day_names = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
-    room_text = f" · каб. {entry.room}" if entry.room else ""
-    message = f"{day_names[day_of_week]}, {lesson_number} пара · {subject.name}{room_text}"
-    for student in students:
-        create_notification(db, student.id, "Расписание изменено", message, "/schedule")
-    create_notification(db, teacher.id, "Вам добавили занятие", message, "/schedule")
-    db.commit()
-    return RedirectResponse(url="/admin/schedule?created=1", status_code=303)
-
-@app.get("/admin/schedule/{entry_id}/edit", response_class=HTMLResponse)
-async def admin_edit_schedule(request: Request, entry_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
-    user = require_admin(access_token, db)
-    if not user:
-        return RedirectResponse(url="/login", status_code=303)
-    entry = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id == entry_id, ScheduleEntry.is_active.is_(True)).options(joinedload(ScheduleEntry.subject), joinedload(ScheduleEntry.group), joinedload(ScheduleEntry.teacher))).first()
-    if not entry:
-        return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
-    groups = db.scalars(select(Group).where(Group.is_active.is_(True)).order_by(Group.name)).all()
-    subjects = db.scalars(select(Subject).where(Subject.is_active.is_(True)).order_by(Subject.name)).all()
-    teachers = db.scalars(select(User).where(User.role == "teacher", User.is_active.is_(True)).order_by(User.full_name)).all()
-    return templates.TemplateResponse(request=request, name="admin_schedule_edit.html", context={"user": user, "entry": entry, "groups": groups, "subjects": subjects, "teachers": teachers})
-
-@app.post("/admin/schedule/{entry_id}/edit")
-async def admin_update_schedule(entry_id: int, group_id: int = Form(...), subject_id: int = Form(...), teacher_id: int = Form(...), day_of_week: int = Form(...), lesson_number: int = Form(...), start_time: str = Form(...), end_time: str = Form(...), room: str = Form(default=""), lesson_type: str = Form(default="Занятие"), access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
-    user = require_admin(access_token, db)
-    if not user:
-        return RedirectResponse(url="/login", status_code=303)
-    entry = db.get(ScheduleEntry, entry_id)
-    if not entry or not entry.is_active:
-        return RedirectResponse(url="/admin/schedule?error=not_found", status_code=303)
-    if day_of_week not in range(5) or lesson_number not in range(1, 7) or len(start_time) != 5 or len(end_time) != 5 or start_time >= end_time:
-        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=time", status_code=303)
-    group, subject, teacher = db.get(Group, group_id), db.get(Subject, subject_id), db.get(User, teacher_id)
-    if not group or not group.is_active or not subject or not subject.is_active or not teacher or teacher.role != "teacher" or not teacher.is_active:
-        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=not_found", status_code=303)
-    assignment = db.scalars(select(TeachingAssignment).where(TeachingAssignment.teacher_id == teacher_id, TeachingAssignment.subject_id == subject_id, TeachingAssignment.group_id == group_id, TeachingAssignment.is_active.is_(True))).first()
-    if not assignment:
-        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=assignment", status_code=303)
-    group_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id != entry_id, ScheduleEntry.is_active.is_(True), ScheduleEntry.group_id == group_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
-    if group_conflict:
-        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=group_conflict", status_code=303)
-    teacher_conflict = db.scalars(select(ScheduleEntry).where(ScheduleEntry.id != entry_id, ScheduleEntry.is_active.is_(True), ScheduleEntry.teacher_id == teacher_id, ScheduleEntry.day_of_week == day_of_week, ScheduleEntry.start_time < end_time, ScheduleEntry.end_time > start_time)).first()
-    if teacher_conflict:
-        return RedirectResponse(url=f"/admin/schedule/{entry_id}/edit?error=teacher_conflict", status_code=303)
-    entry.group_id = group_id
-    entry.subject_id = subject_id
-    entry.teacher_id = teacher_id
-    entry.teaching_assignment_id = assignment.id
-    entry.day_of_week = day_of_week
-    entry.lesson_number = lesson_number
-    entry.start_time = start_time
-    entry.end_time = end_time
-    entry.room = room.strip() or None
-    entry.lesson_type = lesson_type.strip() or "Занятие"
-    students = db.scalars(select(User).where(User.role == "student", User.group_id == group_id, User.is_active.is_(True))).all()
-    day_names = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
-    room_text = f" · каб. {entry.room}" if entry.room else ""
-    message = f"{day_names[day_of_week]}, {lesson_number} пара · {subject.name}{room_text}"
-    for student in students:
-        create_notification(db, student.id, "Расписание изменено", message, "/schedule")
-    create_notification(db, teacher.id, "Расписание изменено", message, "/schedule")
-    db.commit()
-    return RedirectResponse(url="/admin/schedule?updated=1", status_code=303)
-
-@app.post("/admin/schedule/{entry_id}/delete")
-async def admin_delete_schedule(entry_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
-    user = require_admin(access_token, db)
-    if not user:
-        return RedirectResponse(url="/login", status_code=303)
-    entry = db.get(ScheduleEntry, entry_id)
-    if entry:
-        entry.is_active = False
-        students = db.scalars(select(User).where(User.role == "student", User.group_id == entry.group_id, User.is_active.is_(True))).all()
-        subject = db.get(Subject, entry.subject_id)
-        body = f"{entry.lesson_number} пара · {subject.name if subject else 'Занятие'}"
-        for student in students:
-            create_notification(db, student.id, "Занятие отменено", body, "/schedule")
-        teacher = db.get(User, entry.teacher_id)
-        if teacher:
-            create_notification(db, teacher.id, "Занятие отменено", body, "/schedule")
-        db.commit()
-    return RedirectResponse(url="/admin/schedule", status_code=303)
-
-@app.post("/admin/students/{student_id}/delete")
-async def admin_delete_student(student_id: int, access_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
-    user = require_admin(access_token, db)
-    if not user:
-        return RedirectResponse(url="/login", status_code=303)
-    student = db.scalars(select(User).where(User.id == student_id, User.role == "student")).first()
-    if not student:
-        return RedirectResponse(url="/admin/students?error=not_found", status_code=303)
-    db.delete(student)
-    db.commit()
-    return RedirectResponse(url="/admin/students", status_code=303)
-
-@app.get("/logout")
-async def logout():
-    response = RedirectResponse(url="/login", status_code=303)
-    response.delete_cookie(key="access_token", path="/")
-    return response
