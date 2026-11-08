@@ -113,3 +113,20 @@ class Notification(Base):
     is_read: Mapped[bool] = mapped_column(default=False, index=True)
 
     user: Mapped["User"] = relationship()
+
+
+class Grade(Base):
+    __tablename__ = "grades"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False, index=True)
+    value: Mapped[int] = mapped_column(nullable=False)
+    grade_date: Mapped[str] = mapped_column(String(10), nullable=False)
+    comment: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+
+    student: Mapped["User"] = relationship(foreign_keys=[student_id])
+    teacher: Mapped["User"] = relationship(foreign_keys=[teacher_id])
+    subject: Mapped["Subject"] = relationship()
