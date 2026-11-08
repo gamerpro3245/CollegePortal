@@ -19,7 +19,12 @@ password_hash = PasswordHash.recommended()
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    return password_hash.verify(password, hashed_password)
+    # A malformed or legacy hash should reject this login attempt, not crash
+    # the whole authentication endpoint with HTTP 500.
+    try:
+        return password_hash.verify(password, hashed_password)
+    except Exception:
+        return False
 
 
 def create_access_token(username: str, role: str) -> str:
