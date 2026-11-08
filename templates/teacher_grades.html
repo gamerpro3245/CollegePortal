@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Выставить оценки — CollegePortal{% endblock %}
+{% block page_title %}Журнал{% endblock %}
+{% block content %}
+<section class="section-toolbar">
+  <div>
+    <span class="panel-label">ПРЕПОДАВАТЕЛЬ / ЖУРНАЛ</span>
+    <h2>Выставить оценки</h2>
+    <p>Выберите предмет и группу, затем поставьте оценку студенту.</p>
+  </div>
+  <a class="secondary-button" href="/teacher">← Кабинет</a>
+</section>
+
+<section class="panel">
+  {% if request.query_params.get("saved") == "1" %}
+    <div class="notice">Оценка сохранена.</div>
+  {% elif request.query_params.get("error") == "invalid" %}
+    <div class="admin-error">Не удалось сохранить оценку. Проверьте данные.</div>
+  {% endif %}
+
+  {% if assignments %}
+    <form method="get" action="/teacher/grades" class="admin-form">
+      <div class="form-field">
+        <label for="ta">ПРЕДМЕТ И ГРУППА</label>
+        <select id="ta" name="ta" onchange="this.form.submit()">
+          <option value="">Выберите…</option>
+          {% for item in assignments %}
+            <option value="{{ item.id }}" {% if selected and selected.id == item.id %}selected{% endif %}>
+              {{ item.subject.name }} — {{ item.group.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <noscript><button type="submit" class="secondary-button">Показать</button></noscript>
+    </form>
+
+    {% if selected %}
+      <div style="margin-top:14px;display:grid;gap:8px">
+        {% for student in students %}
+          <form action="/teacher/grades/create" method="post" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff">
+            <input type="hidden" name="teaching_assignment_id" value="{{ selected.id }}">
+            <input type="hidden" name="student_id" value="{{ student.id }}">
+            <strong style="flex:1 1 100%;font-size:13px">{{ student.full_name }}</strong>
+            <select name="value" aria-label="Оценка для {{ student.full_name }}" style="flex:0 0 80px;min-height:38px">
+              <option value="5">5</option>
+              <option value="4">4</option>
+              <option value="3">3</option>
+              <option value="2">2</option>
+            </select>
+            <input name="comment" type="text" maxlength="300" placeholder="Комментарий (необязательно)" style="flex:1 1 140px;min-width:0;min-height:38px">
+            <button type="submit" class="primary-button">Поставить</button>
+          </form>
+        {% else %}
+          <div class="table-empty">
+            <strong>В группе нет студентов</strong>
+            <p>Назначьте студентов в группу через админ-панель.</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <strong>Назначений пока нет</strong>
+      <p>Администратор ещё не назначил вам предметы и группы.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
