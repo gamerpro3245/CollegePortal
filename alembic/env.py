@@ -16,6 +16,12 @@ if database_url:
         database_url = database_url.replace("postgres://", "postgresql+psycopg://", 1)
     elif database_url.startswith("postgresql://"):
         database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    # Keep Alembic's connection settings aligned with app/database.py.
+    # Render Postgres supports sslmode=require for both internal and external URLs.
+    if database_url.startswith("postgresql+psycopg://") and "sslmode=" not in database_url:
+        database_url += ("&" if "?" in database_url else "?") + "sslmode=require"
+
     config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
